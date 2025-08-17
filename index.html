@@ -3,11 +3,15 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
 <title>K-Pop Save One • Drop One</title>
 <style>
   :root{
     --left:#FFC328; --right:#2F81FF; --panel:#0b0b14; --card:#ffffff;
     --ink:#0e0e14; --muted:#6b7280; --accent:#00e676; --danger:#ff3b3b; --radius:22px;
+    --text-stroke-color: rgba(0,0,0,.92);
   }
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -15,9 +19,10 @@
     margin:0;
     font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;
     background:linear-gradient(90deg,var(--left),var(--right));
-    color:#fff; display:flex; flex-direction:column
+    color:#fff; display:flex; flex-direction:column;
+    transition: background .25s ease;
   }
-  header{padding:10px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px}
+  header{padding:10px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px;}
   .brand{font-weight:900; letter-spacing:.5px; display:flex; align-items:center; gap:10px}
   .brand .pill{background:#111; padding:6px 10px; border-radius:999px; font-size:12px; color:#aaa}
   .controls{display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:flex-end}
@@ -28,22 +33,48 @@
   button{border:none; background:#111; color:#fff; padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:700}
   .btn-accent{background:var(--accent); color:#022b1a}
   .btn-ghost{background:#111827}
-  .btn-danger{background:var(--danger)}
   .tog{display:flex; align-items:center; gap:8px; background:#111827; border-radius:999px; padding:6px 10px; cursor:pointer; user-select:none}
   .tog input{display:none}
   .dot{width:18px; height:18px; border-radius:999px; background:#333}
   .tog input:checked + .dot{background:var(--accent)}
   .bar{padding:6px 14px; background:#0b0b14; color:#cbd5e1; border-radius:999px; font-weight:700}
   .arena{flex:1; display:grid; grid-template-columns:1fr 80px 1fr; gap:12px; padding:14px; min-height:0}
-  .side{background:rgba(255,255,255,.15); border-radius:var(--radius); padding:16px; display:flex; flex-direction:column; gap:12px; backdrop-filter:blur(6px)}
+
+  /* Sides */
+  .side{
+    position:relative;
+    background:rgba(255,255,255,.15);
+    border-radius:var(--radius);
+    padding:16px; display:flex; flex-direction:column; gap:12px; backdrop-filter:blur(6px);
+    transition: background .25s ease;
+  }
   .side.left{background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.25)),var(--left)}
   .side.right{background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.25)),var(--right)}
+
   .frame{background:#fff; border-radius:20px; padding:10px; box-shadow:0 10px 30px rgba(0,0,0,.25);
          aspect-ratio:16/9; display:flex; align-items:center; justify-content:center}
   .frame iframe{width:100%; height:100%; border:0; border-radius:12px}
+
+  /* Title/Artist with outline */
+  .artist, .title{
+    color:#fff;
+    line-height:1.05;
+    letter-spacing:.2px;
+    -webkit-text-stroke: var(--stroke-size, 2px) var(--text-stroke-color);
+    text-shadow:
+      1px  1px 0 var(--text-stroke-color),
+     -1px  1px 0 var(--text-stroke-color),
+      1px -1px 0 var(--text-stroke-color),
+     -1px -1px 0 var(--text-stroke-color),
+      2px  0   0 var(--text-stroke-color),
+     -2px  0   0 var(--text-stroke-color),
+      0    2px 0 var(--text-stroke-color),
+      0   -2px 0 var(--text-stroke-color);
+  }
   .meta{text-align:center; background:#00000055; padding:10px; border-radius:12px}
-  .artist{font-size:20px; font-weight:900; line-height:1.1}
-  .title{font-size:16px; opacity:.95}
+  .artist{font-weight:900; font-size: clamp(26px, 3.4vw, 36px); --stroke-size: 1px;}
+  .title {font-weight:800; font-size: clamp(20px, 2.6vw, 28px); --stroke-size: 1px;}
+
   .tags{margin-top:6px; display:flex; flex-wrap:wrap; gap:6px; justify-content:center}
   .tag{background:#0b0b14; color:#cbd5e1; font-size:12px; padding:4px 8px; border-radius:999px}
   .actions{display:flex; gap:10px; justify-content:center; flex-wrap:wrap}
@@ -51,15 +82,27 @@
   .vsBadge{font-size:44px; font-weight:900; background:#0b0b14; padding:10px 18px; border-radius:18px; box-shadow:0 10px 30px rgba(0,0,0,.25)}
   .rule{text-align:center; background:#0b0b14; color:#9ae6b4; padding:8px 12px; border-radius:999px; font-weight:900; font-size:14px}
   .sub{color:#cbd5e1; font-size:12px}
-  dialog{border:none; padding:0; border-radius:16px; width:min(1000px,92vw); max-height:90vh; box-shadow:0 20px 80px rgba(0,0,0,.5); overflow:hidden}
-  .modalHead{display:flex; justify-content:space-between; align-items:center; padding:12px 14px; background:#0b0b14; color:#fff}
-  .modalBody{padding:14px; background:#0f172a}
-  textarea{width:100%; min-height:40vh; background:#0b1020; color:#e5e7eb; border:none; border-radius:12px; padding:12px; resize:vertical;
-           font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12.5px; line-height:1.4}
-  .small{font-size:12px; color:#9ca3af}
-  .flex{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
-  .grow{flex:1}
-  footer{padding:8px 14px; display:flex; gap:8px; justify-content:flex-end; background:#0b0b14}
+
+  /* Reveal veil */
+  .veil{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    padding:16px;
+    background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,.55));
+    border-radius:var(--radius);
+    visibility:hidden; opacity:0; transition:opacity .2s ease;
+  }
+  .side.concealed .veil{visibility:visible; opacity:1}
+  .revealBtn{font-size:clamp(18px,2.4vw,22px); padding:14px 18px}
+  .hint{font-size:12px; opacity:.8}
+
+  /* Disabled vote buttons */
+  button:disabled{opacity:.45; cursor:not-allowed}
+
+  @media (max-width: 420px){
+    .artist{ --stroke-size: 2.2px; }
+    .title { --stroke-size: 1.8px; }
+  }
 </style>
 </head>
 <body>
@@ -71,9 +114,7 @@
   <div class="controls">
     <span class="bar" id="categoryLabel">Category: —</span>
 
-    <select id="categorySelect" title="Category">
-      <!-- filled at runtime -->
-    </select>
+    <select id="categorySelect" title="Category"></select>
 
     <input id="yearInput" type="number" placeholder="Year (e.g., 2024)" style="display:none;width:140px"/>
     <input id="letterInput" type="text" maxlength="1" placeholder="Letter (A-Z)" style="display:none;width:120px;text-transform:uppercase"/>
@@ -86,20 +127,32 @@
 
     <label class="tog"><input id="championMode" type="checkbox"/><span class="dot"></span><span class="sub">Champion mode</span></label>
 
+    <label class="tog"><input id="autoReveal" type="checkbox"/><span class="dot"></span><span class="sub">Auto reveal</span></label>
+
+    <select id="revealOrder" title="Reveal order">
+      <option value="random">Order: Random</option>
+      <option value="leftFirst">Order: Left → Right</option>
+      <option value="rightFirst">Order: Right → Left</option>
+    </select>
+
     <button class="btn-ghost" id="btnNewPair">New Pair</button>
-    <button class="btn-accent" id="btnSongMgr">Song Manager</button>
+    <button class="btn-ghost" id="btnHardRefresh" title="Force reload (cache-bust)">Hard Refresh</button>
   </div>
 </header>
 
 <main class="arena">
-  <section class="side left" id="leftCard">
+  <section class="side left concealed" id="leftCard">
     <div class="frame"><iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>
     <div class="meta">
       <div class="artist" id="leftArtist">—</div>
       <div class="title" id="leftTitle">—</div>
       <div class="tags" id="leftTags"></div>
     </div>
-    <div class="actions"><button class="btn-accent" id="saveLeft">Save Left</button></div>
+    <div class="actions"><button class="btn-accent" id="saveLeft" disabled>Save Left</button></div>
+    <div class="veil">
+      <button class="btn-accent revealBtn" id="revealLeft">Reveal</button>
+      <span class="hint">Tap to reveal before voting</span>
+    </div>
   </section>
 
   <section class="vs">
@@ -108,83 +161,77 @@
     <div class="sub" id="score">Choices: 0</div>
   </section>
 
-  <section class="side right" id="rightCard">
+  <section class="side right concealed" id="rightCard">
     <div class="frame"><iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>
     <div class="meta">
       <div class="artist" id="rightArtist">—</div>
       <div class="title" id="rightTitle">—</div>
       <div class="tags" id="rightTags"></div>
     </div>
-    <div class="actions"><button class="btn-accent" id="saveRight">Save Right</button></div>
+    <div class="actions"><button class="btn-accent" id="saveRight" disabled>Save Right</button></div>
+    <div class="veil">
+      <button class="btn-accent revealBtn" id="revealRight">Reveal</button>
+      <span class="hint">Tap to reveal before voting</span>
+    </div>
   </section>
 </main>
 
-<!-- Song Manager -->
-<dialog id="mgr">
-  <div class="modalHead"><strong>Song Manager</strong><button onclick="mgr.close()">✕</button></div>
-  <div class="modalBody">
-    <div class="small" style="margin-bottom:8px">
-      Each song supports: <code>{ id, artist, title, youtubeId, tags, year, group, company, gender, debut, highlight, songStart }</code>.<br>
-      <b>Tags become categories automatically</b> when a tag appears on 2+ songs (e.g., <code>"Letter: C"</code>).<br>
-      <b>highlight</b> = seconds for the “Start at highlight” toggle. <b>songStart</b> = seconds for real song beginning (optional).
-    </div>
-    <textarea id="mgrText"></textarea>
-    <div style="margin:10px 0" class="flex">
-      <input type="file" id="fileInput" accept=".json"/>
-      <span class="grow"></span>
-      <button class="btn-ghost" id="btnExport">Export JSON</button>
-      <button class="btn-accent" id="btnApply">Apply</button>
-      <button class="btn-danger" id="btnReset">Reset to Demo Set</button>
-    </div>
-  </div>
-  <footer><span class="small" style="margin-right:auto">Data stays in your browser (localStorage).</span><button class="btn-ghost" onclick="mgr.close()">Close</button></footer>
-</dialog>
+<!-- SFX -->
+<audio id="sfxPop" src="pop.mp3" preload="auto"></audio>
 
 <script>
-/* ---------- Demo songs (added highlight/songStart fields) ---------- */
-const DEMO_SONGS = [
-  { id:"lesserafim-crazy", artist:"LE SSERAFIM", group:"LE SSERAFIM", gender:"girls", company:"HYBE", title:"Crazy", year:2024, debut:false, youtubeId:"n6B5gQXlB-0", tags:["Letter: C"], highlight:64, songStart:0 },
-  { id:"aespa-whiplash", artist:"aespa", group:"aespa", gender:"girls", company:"SM", title:"Whiplash", year:2024, debut:false, youtubeId:"jWQx2f-CErU", tags:["Letter: W"], highlight:36, songStart:0 },
-  { id:"newjeans-omg", artist:"NewJeans", group:"NewJeans", gender:"girls", company:"HYBE", title:"OMG", year:2023, debut:false, youtubeId:"sVTy_wmn5SU", tags:["Letter: O"], highlight:45, songStart:0 },
-  { id:"ive-eleven", artist:"IVE", group:"IVE", gender:"girls", company:"Starship", title:"LOVE DIVE", year:2021, debut:false, youtubeId:"Y8JFxS1HlDo", tags:["Letter: L"], highlight:54, songStart:0 },
-  { id:"itzy-dalla", artist:"ITZY", group:"ITZY", gender:"girls", company:"JYP", title:"DALLA DALLA", year:2019, debut:true, youtubeId:"pNfTK39k55U", tags:["Letter: D","Debut"], highlight:69, songStart:0 },
-  { id:"twice-tth", artist:"TWICE", group:"TWICE", gender:"girls", company:"JYP", title:"Talk That Talk", year:2022, debut:false, youtubeId:"k6jqx9kZgPM", tags:["Letter: T"], highlight:57, songStart:0 },
-  { id:"idle-queencard", artist:"(G)I-DLE", group:"(G)I-DLE", gender:"girls", company:"CUBE", title:"Queencard", year:2023, debut:false, youtubeId:"7HDeem-JaSY", tags:["Letter: Q"], highlight:61, songStart:0 },
-  { id:"illit-magnetic", artist:"ILLIT", group:"ILLIT", gender:"girls", company:"HYBE", title:"Magnetic", year:2024, debut:true, youtubeId:"n6B5gQXlB-0", tags:["Letter: M", "Debut"], highlight:97, songStart:0 },
-  { id:"illit-jellyous", artist:"ILLIT", group:"ILLIT", gender:"girls", company:"HYBE", title:"jellyous", year:2025, debut:false, youtubeId:"GkG60kISnfc", tags:["Letter: J"], highlight:49, songStart:0 },
-  { id:"illit-dtd", artist:"ILLIT", group:"ILLIT", gender:"girls", company:"HYBE", title:"Billyeoon Goyangi (Do the Dance)", year:2025, debut:false, youtubeId:"negtrQu5mTA", tags:["Letter: B"], highlight:70, songStart:0 },
-  { id:"fromis9-lkubetter", artist:"fromis_9", group:"fromis_9", gender:"girls", company:"ASND", title:"fromis_9", year:2025, debut:false, youtubeId:"r1QapH1SIAI", tags:["Letter: L"], highlight:53, songStart:0 },
+/* ---------- Config for auto reveal ---------- */
+const AUTO_FIRST_MS = 300;   // delay before first reveal
+const AUTO_GAP_MS   = 1200;  // gap between first and second reveal
 
+/* ---------- Hard-coded songs ---------- */
+const SONGS = Object.freeze([
+  { id:"lesserafim-crazy", artist:"LE SSERAFIM", group:"LE SSERAFIM", gender:"girls", company:"HYBE", title:"Crazy", year:2024, debut:false, youtubeId:"n6B5gQXlB-0", tags:["Letter: C"], highlight:64, songStart:0, color:"#ff6aa0" },
+  { id:"aespa-whiplash", artist:"aespa", group:"aespa", gender:"girls", company:"SM", title:"Whiplash", year:2024, debut:false, youtubeId:"jWQx2f-CErU", tags:["Letter: W"], highlight:36, songStart:0, color:"#7a8cff" },
+  { id:"newjeans-omg", artist:"NewJeans", group:"NewJeans", gender:"girls", company:"HYBE", title:"OMG", year:2023, debut:false, youtubeId:"sVTy_wmn5SU", tags:["Letter: O"], highlight:45, songStart:0, color:"#00d0b3" },
+  { id:"ive-eleven", artist:"IVE", group:"IVE", gender:"girls", company:"Starship", title:"LOVE DIVE", year:2021, debut:false, youtubeId:"Y8JFxS1HlDo", tags:["Letter: L", "Love"], highlight:54, songStart:0, color:"#7dd3fc" },
+  { id:"itzy-dalla", artist:"ITZY", group:"ITZY", gender:"girls", company:"JYP", title:"DALLA DALLA", year:2019, debut:true, youtubeId:"pNfTK39k55U", tags:["Letter: D","Debut"], highlight:69, songStart:0, color:"#fbbf24" },
+  { id:"twice-tth", artist:"TWICE", group:"TWICE", gender:"girls", company:"JYP", title:"Talk That Talk", year:2022, debut:false, youtubeId:"k6jqx9kZgPM", tags:["Letter: T"], highlight:57, songStart:0, color:"#22c55e" },
+  { id:"idle-queencard", artist:"(G)I-DLE", group:"(G)I-DLE", gender:"girls", company:"CUBE", title:"Queencard", year:2023, debut:false, youtubeId:"7HDeem-JaSY", tags:["Letter: Q"], highlight:61, songStart:0, color:"#f472b6" },
+  { id:"illit-magnetic", artist:"ILLIT", group:"ILLIT", gender:"girls", company:"HYBE", title:"Magnetic", year:2024, debut:true, youtubeId:"Vk5-c_v4gMU", tags:["Letter: M","Debut"], highlight:97, songStart:0, color:"#34d399" },
+  { id:"illit-jellyous", artist:"ILLIT", group:"ILLIT", gender:"girls", company:"HYBE", title:"jellyous", year:2025, debut:false, youtubeId:"GkG60kISnfc", tags:["Letter: J"], highlight:49, songStart:0, color:"#60a5fa" },
+  { id:"illit-dtd", artist:"ILLIT", group:"ILLIT", gender:"girls", company:"HYBE", title:"Billyeoon Goyangi (Do the Dance)", year:2025, debut:false, youtubeId:"negtrQu5mTA", tags:["Letter: B"], highlight:70, songStart:0, color:"#a78bfa" },
+  { id:"fromis9-lkubetter", artist:"fromis_9", group:"fromis_9", gender:"girls", company:"ASND", title:"Like You Better", year:2025, debut:false, youtubeId:"r1QapH1SIAI", tags:["Letter: L"], highlight:53, songStart:0, color:"#fb7185" },
+  { id:"h2h-style", artist:"Hearts2Hearts", group:"Hearts2Hearts", gender:"girls", company:"SM", title:"Style", year:2025, debut:false, youtubeId:"n7kFRxFIPrI", tags:["Letter: S"], highlight:51, songStart:0, color:"#f59e0b" },
+  { id:"illit-ticktack", artist:"ILLIT", group:"ILLIT", gender:"girls", company:"HYBE", title:"Tick-Tack", year:2024, debut:false, youtubeId:"-nEGVrzPaiU", tags:["Letter: T"], highlight:68, songStart:0, color:"#ffa9ca" },
+  { id:"illit-cherish", artist:"ILLIT", group:"ILLIT", gender:"girls", company:"HYBE", title:"Cherish (My Love)", year:2024, debut:false, youtubeId:"tbDGl7jEazA", tags:["Letter: C", "Love"], highlight:52, songStart:0, color:"#c9024e" },
+  { id:"illit-lgs", artist:"ILLIT", group:"ILLIT", gender:"girls", company:"HYBE", title:"Lucky Girl Syndrome", year:2024, debut:false, youtubeId:"UCmgGZbfjmk", tags:["Letter: L"], highlight:38, songStart:0, color:"#c9024e" },
 
-  { id:"txt-chasing", artist:"TOMORROW X TOGETHER", group:"TXT", gender:"boys", company:"HYBE", title:"Chasing That Feeling", year:2023, debut:false, youtubeId:"k_e2oJzoLw0", tags:["Letter: C"], highlight:37, songStart:0 },
-  { id:"nct-baggy", artist:"NCT U", group:"NCT", gender:"boys", company:"SM", title:"Baggy Jeans", year:2023, debut:false, youtubeId:"PEMndV4J2K0", tags:["Letter: B"], highlight:28, songStart:0 },
-  { id:"straykids-lalalala", artist:"Stray Kids", group:"Stray Kids", gender:"boys", company:"JYP", title:"LALALALA", year:2023, debut:false, youtubeId:"JsOOis4bBFg", tags:["Letter: L"], highlight:32, songStart:0 },
-  { id:"enhypen-drunk", artist:"ENHYPEN", group:"ENHYPEN", gender:"boys", company:"HYBE", title:"Drunk-Dazed", year:2021, debut:false, youtubeId:"Fc7-Oe0tj5k", tags:["Letter: D"], highlight:44, songStart:0 },
-  { id:"shinee-lucifer", artist:"SHINee", group:"SHINee", gender:"boys", company:"SM", title:"Lucifer", year:2010, debut:false, youtubeId:"DTBXb4QK3v4", tags:["Letter: L"], highlight:52, songStart:0 },
-  
-];
-
-/* ---------- Storage ---------- */
-const STORAGE_KEY = "kpop_sodo_songs_v3"; // bumped key since schema grew
-const loadSongs = ()=> {
-  try{
-    const r=localStorage.getItem(STORAGE_KEY);
-    if(!r){ localStorage.setItem(STORAGE_KEY, JSON.stringify(DEMO_SONGS)); return DEMO_SONGS.slice(); }
-    const a=JSON.parse(r);
-    return Array.isArray(a)?a:DEMO_SONGS.slice();
-  }catch{ return DEMO_SONGS.slice(); }
-};
-const saveSongs = (arr)=> localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+  { id:"txt-chasing", artist:"TOMORROW X TOGETHER", group:"TXT", gender:"boys", company:"HYBE", title:"Chasing That Feeling", year:2023, debut:false, youtubeId:"k_e2oJzoLw0", tags:["Letter: C"], highlight:37, songStart:0, color:"#00bcd4" },
+  { id:"nct-baggy", artist:"NCT U", group:"NCT", gender:"boys", company:"SM", title:"Baggy Jeans", year:2023, debut:false, youtubeId:"PEMndV4J2K0", tags:["Letter: B"], highlight:28, songStart:0, color:"#06b6d4" },
+  { id:"straykids-lalalala", artist:"Stray Kids", group:"Stray Kids", gender:"boys", company:"JYP", title:"LALALALA", year:2023, debut:false, youtubeId:"JsOOis4bBFg", tags:["Letter: L"], highlight:32, songStart:0, color:"#4ade80" },
+  { id:"enhypen-drunk", artist:"ENHYPEN", group:"ENHYPEN", gender:"boys", company:"HYBE", title:"Drunk-Dazed", year:2021, debut:false, youtubeId:"Fc7-Oe0tj5k", tags:["Letter: D"], highlight:44, songStart:0, color:"#f87171" },
+  { id:"shinee-lucifer", artist:"SHINee", group:"SHINee", gender:"boys", company:"SM", title:"Lucifer", year:2010, debut:false, youtubeId:"DTBXb4QK3v4", tags:["Letter: L"], highlight:52, songStart:0, color:"#60a5fa" },
+]);
 
 /* ---------- Helpers ---------- */
 const rand = (n)=>Math.floor(Math.random()*n);
 const sample = (arr)=> arr.length?arr[rand(arr.length)]:null;
-const uniqById = (arr)=>[...new Map(arr.map(x=>[x.id,x])).values()];
 const escapeHtml = (s)=>String(s).replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
 function embedUrl(yid, startSec){
   const base=`https://www.youtube-nocookie.com/embed/${yid}?autoplay=0&modestbranding=1&rel=0`;
   const start = (startSec && startSec>0) ? `&start=${Math.floor(startSec)}` : "";
   return base + start;
+}
+/* color helpers */
+function hashCode(str){ let h=0; for(let i=0;i<str.length;i++){ h=(h<<5)-h+str.charCodeAt(i); h|=0; } return Math.abs(h); }
+function generatedColorFor(song, side){
+  const h = (hashCode(song?.id || side) % 360 + (side==='right'?24:0)) % 360;
+  return `hsl(${h} 80% 55%)`;
+}
+function getSongColor(song, side){
+  const c = (song && typeof song.color==='string' && song.color.trim()) ? song.color.trim() : null;
+  return c || generatedColorFor(song, side);
+}
+function setPageGradient(leftColor, rightColor){
+  const root = document.documentElement;
+  root.style.setProperty('--left', leftColor);
+  root.style.setProperty('--right', rightColor);
 }
 
 /* ---------- Tag normalization ---------- */
@@ -204,13 +251,17 @@ function songHasNormTag(song, normStr){
 
 /* ---------- Static categories ---------- */
 const StaticCats = {
-  random: { label: "Random (each round)", genPairs(){ return []; } }, // handled specially
+  random: { label: "Random (each round)", genPairs(){ return []; } },
   any:    { label: "Any", genPairs(songs){ return allPairs(songs); } },
   boysVgirls: { label:"Boys vs Girls", genPairs(s){return pairWhere(s,a=>a.gender==="boys",b=>b.gender==="girls");}},
   girlsVgirls:{ label:"Girls vs Girls", genPairs(s){return pairWhere(s,a=>a.gender==="girls",b=>b.gender==="girls",true);}},
   boysVboys:  { label:"Boys vs Boys",  genPairs(s){return pairWhere(s,a=>a.gender==="boys",b=>b.gender==="boys",true);}},
   companySMvJYP:{label:"SM Ent. vs JYP Ent.", genPairs(s){return pairWhere(s,a=>a.company==="SM",b=>b.company==="JYP");}},
   companySMvHYBE:{label:"SM Ent. vs HYBE", genPairs(s){return pairWhere(s,a=>a.company==="SM",b=>b.company==="HYBE");}},
+  companyHYBEvJYP:{label:"JYP Ent. vs HYBE", genPairs(s){return pairWhere(s,a=>a.company==="JYP",b=>b.company==="HYBE");}},
+  companySMvYG:{label:"SM Ent. vs YG Ent.", genPairs(s){return pairWhere(s,a=>a.company==="SM",b=>b.company==="YG");}},
+  companyYGvJYP:{label:"JYP Ent. vs YG Ent.", genPairs(s){return pairWhere(s,a=>a.company==="JYP",b=>b.company==="YG");}},
+  companyHYBEvYG:{label:"YG Ent. vs HYBE", genPairs(s){return pairWhere(s,a=>a.company==="YG",b=>b.company==="HYBE");}},
   sameYear:   { label:"Same Release Year", genPairs(s){return allPairs(s).filter(([a,b])=>a.year&&b.year&&a.year===b.year);}},
   year:       { label:(y)=>`Year ${y}`, genPairs(s,o){const y=Number(o?.year);return allPairs(s.filter(x=>x.year===y));}},
   startsWith: { label:(L)=>`Starts with the letter ${String(L||"").toUpperCase()}`,
@@ -221,7 +272,7 @@ const StaticCats = {
 
 /* ---------- Dynamic categories from tags ---------- */
 function buildDynamicTagCategories(songs){
-  const counts = new Map(); // normTag -> {pretty,count}
+  const counts = new Map();
   for(const s of songs){
     for(const t of (s.tags||[])){
       const nt = normTag(t);
@@ -232,13 +283,10 @@ function buildDynamicTagCategories(songs){
   const dyn = {};
   for(const [norm, rec] of counts){
     if(rec.count >= 2){
-      const key = `tag|${norm}`; // e.g., tag|letter:c
+      const key = `tag|${norm}`;
       dyn[key] = {
         label: rec.pretty,
-        genPairs(songs){
-          const pool = songs.filter(s=>songHasNormTag(s, norm));
-          return allPairs(pool);
-        }
+        genPairs(songs){ const pool = songs.filter(s=>songHasNormTag(s, norm)); return allPairs(pool); }
       };
     }
   }
@@ -256,9 +304,15 @@ function pairWhere(songs, predA, predB, allowSame=false){
 }
 
 /* ---------- App state ---------- */
-let SONGS = loadSongs();
-let DYN = buildDynamicTagCategories(SONGS);   // dynamic tag categories
+const DYN = buildDynamicTagCategories(SONGS);
 let currentPair=[null,null], champion=null, picks=0, currentCatKey=null;
+
+/* Reveal + pending */
+const revealed = { left:false, right:false };
+const pending = { left:null, right:null };
+
+/* Auto reveal timers (track per side) */
+const autoTimers = { left:null, right:null };
 
 const els={
   categorySelect:document.getElementById('categorySelect'),
@@ -274,13 +328,11 @@ const els={
   newPair:document.getElementById('btnNewPair'),
   championMode:document.getElementById('championMode'),
   toggleHighlight:document.getElementById('toggleHighlight'),
-  mgrBtn:document.getElementById('btnSongMgr'),
-  mgr:document.getElementById('mgr'),
-  mgrText:document.getElementById('mgrText'),
-  mgrApply:document.getElementById('btnApply'),
-  mgrExport:document.getElementById('btnExport'),
-  mgrReset:document.getElementById('btnReset'),
-  fileInput:document.getElementById('fileInput'),
+  revealLeft:document.getElementById('revealLeft'),
+  revealRight:document.getElementById('revealRight'),
+  autoReveal:document.getElementById('autoReveal'),
+  revealOrder:document.getElementById('revealOrder'),
+  sfxPop:document.getElementById('sfxPop'),
 };
 
 /* ---------- Category UI ---------- */
@@ -296,6 +348,11 @@ function refreshCategoryDropdown(){
   add("girlsVgirls","Girls vs Girls");
   add("boysVboys","Boys vs Boys");
   add("companySMvJYP","SM Ent. vs JYP Ent.");
+  add("companySMvHYBE","SM Ent. vs HYBE");
+  add("companyHYBEvJYP","JYP Ent. vs HYBE");
+  add("companySMvYG","SM Ent. vs YG Ent");
+  add("companyYGvJYP","JYP Ent. vs YG Ent");
+  add("companyHYBEvYG","HYBE vs YG Ent");
   add("sameYear","Same Release Year");
   add("year","Specific Year…");
   add("startsWith","Starts with Letter…");
@@ -307,7 +364,7 @@ function refreshCategoryDropdown(){
     add(key, DYN[key].label);
   }
 
-  sel.value = "random"; // default to random
+  sel.value = "random";
   updateCategoryUI();
 }
 function updateCategoryUI(){
@@ -322,6 +379,89 @@ function startSecondsFor(song){
   const highlight = Number(song.highlight||0);
   const songStart = Number(song.songStart||0);
   return useHighlight ? highlight : songStart;
+}
+
+/* ---------- SFX ---------- */
+function playPop(){
+  try{
+    // clone so overlapping plays are fine
+    const a = els.sfxPop.cloneNode(true);
+    a.volume = 1;
+    a.play().catch(()=>{ /* autoplay may be blocked until a user gesture */ });
+  }catch{}
+}
+
+/* ---------- Reveal helpers ---------- */
+function setVoteEnabled(){
+  const canVote = revealed.left && revealed.right;
+  els.saveLeft.disabled  = !canVote;
+  els.saveRight.disabled = !canVote;
+}
+function concealSide(side){
+  revealed[side] = false;
+  const cardId = side==='left' ? 'leftCard' : 'rightCard';
+  document.getElementById(cardId).classList.add('concealed');
+}
+function revealSide(side){
+  if (revealed[side]) return;
+  const p = pending[side]; if(!p) return;
+
+  // stop any timer for this side (e.g., manual reveal beats auto)
+  clearAutoTimer(side);
+
+  const dest = els[side];
+  dest.frame.src = p.url;
+  dest.artist.textContent = p.song.artist;
+  dest.title.textContent  = p.song.title;
+  dest.tags.innerHTML = renderTags(p.song);
+  const cardId = side==='left' ? 'leftCard' : 'rightCard';
+  document.getElementById(cardId).classList.remove('concealed');
+  revealed[side] = true;
+  setVoteEnabled();
+
+  playPop(); // sfx on reveal
+
+  // If auto reveal is on and the other side isn't revealed, ensure it gets scheduled after the GAP
+  if (els.autoReveal.checked){
+    const other = side==='left' ? 'right' : 'left';
+    if (!revealed[other] && !autoTimers[other]){
+      autoTimers[other] = setTimeout(()=>{
+        autoTimers[other]=null;
+        revealSide(other);
+      }, AUTO_GAP_MS);
+    }
+  }
+}
+
+/* ---------- Auto reveal scheduling ---------- */
+function clearAutoTimer(side){
+  if (autoTimers[side]){ clearTimeout(autoTimers[side]); autoTimers[side]=null; }
+}
+function clearAllAutoTimers(){ clearAutoTimer('left'); clearAutoTimer('right'); }
+
+function pickRevealOrder(){
+  const mode = els.revealOrder.value;
+  if (mode === 'leftFirst')  return ['left','right'];
+  if (mode === 'rightFirst') return ['right','left'];
+  return Math.random()<0.5 ? ['left','right'] : ['right','left'];
+}
+
+function scheduleAutoReveal(){
+  clearAllAutoTimers();
+  if(!els.autoReveal.checked) return;
+
+  const [first, second] = pickRevealOrder();
+
+  if (!revealed.left && !revealed.right){
+    // Fresh round: schedule both with intended gap
+    autoTimers[first]  = setTimeout(()=>{ autoTimers[first]=null;  revealSide(first); },  AUTO_FIRST_MS);
+    autoTimers[second] = setTimeout(()=>{ autoTimers[second]=null; revealSide(second); }, AUTO_FIRST_MS + AUTO_GAP_MS);
+  } else if (revealed.left && !revealed.right){
+    // Only right left to reveal -> wait a full gap from now
+    autoTimers.right = setTimeout(()=>{ autoTimers.right=null; revealSide('right'); }, AUTO_GAP_MS);
+  } else if (revealed.right && !revealed.left){
+    autoTimers.left = setTimeout(()=>{ autoTimers.left=null; revealSide('left'); }, AUTO_GAP_MS);
+  }
 }
 
 /* ---------- Round logic ---------- */
@@ -343,6 +483,9 @@ function availableRandomKeys(){
   return [...base, ...dyn];
 }
 function nextPair(keepChampion=false){
+  // New round: kill any old timers so they can't fire into the next round
+  clearAllAutoTimers();
+
   const chosenKey = (els.categorySelect.value==="random" && !keepChampion)
     ? sample(availableRandomKeys())
     : (keepChampion ? currentCatKey : els.categorySelect.value);
@@ -353,7 +496,6 @@ function nextPair(keepChampion=false){
               : (StaticCats[chosenKey] || StaticCats.any);
   const opts = { year:Number(els.yearInput.value||0), letter:(els.letterInput.value||"").toUpperCase() };
   const pairs = cat.genPairs(SONGS, opts) || [];
-
   if (!pairs.length){ alert("No pairs match this category. Add more songs or change the rule."); return; }
 
   let pair;
@@ -370,15 +512,34 @@ function nextPair(keepChampion=false){
   applySongToSide(pair[0], 'left');
   applySongToSide(pair[1], 'right');
   setRuleLabel(chosenKey);
+
+  // match page background to song colors
+  setPageGradient(getSongColor(pair[0],'left'), getSongColor(pair[1],'right'));
+
+  // reset voting & schedule auto reveal
+  setVoteEnabled();
+  scheduleAutoReveal();
 }
+
+/* ---------- Apply song to side (concealed by default) ---------- */
 function applySongToSide(song, side){
   const dest = els[side];
-  const startAt = startSecondsFor(song);
-  dest.frame.src = song ? embedUrl(song.youtubeId, startAt) : "";
-  dest.artist.textContent = song ? song.artist : "—";
-  dest.title.textContent  = song ? song.title  : "—";
-  dest.tags.innerHTML = song ? renderTags(song) : "";
+  const url = embedUrl(song.youtubeId, startSecondsFor(song));
+  pending[side] = { song, url };
+
+  dest.frame.src = "";
+  dest.artist.textContent = "—";
+  dest.title.textContent  = "—";
+  dest.tags.innerHTML = "";
+
+  const cardEl = document.getElementById(side==='left' ? 'leftCard' : 'rightCard');
+  const color = getSongColor(song, side);
+  if (side==='left') cardEl.style.setProperty('--left', color);
+  else cardEl.style.setProperty('--right', color);
+
+  concealSide(side);
 }
+
 function renderTags(s){
   const chips=[];
   if (s.group) chips.push(`<span class="tag">Group: ${escapeHtml(s.group)}</span>`);
@@ -388,74 +549,66 @@ function renderTags(s){
   if (s.debut) chips.push(`<span class="tag">Debut</span>`);
   if (s.highlight!=null) chips.push(`<span class="tag">Highlight: ${Math.floor(s.highlight)}s</span>`);
   if (s.songStart) chips.push(`<span class="tag">Song start: ${Math.floor(s.songStart)}s</span>`);
+  if (s.color) chips.push(`<span class="tag">Color</span>`);
   (s.tags||[]).forEach(t=> chips.push(`<span class="tag">${escapeHtml(t)}</span>`));
   return chips.join("");
 }
+
 function choose(side){
+  if(!(revealed.left && revealed.right)) return;
   const winner = (side==='left') ? currentPair[0] : currentPair[1];
   champion = els.championMode.checked ? winner : null;
   picks++; els.score.textContent = `Choices: ${picks}`;
   nextPair(els.championMode.checked);
 }
 
-/* ---------- Song Manager ---------- */
-const mgr = document.getElementById('mgr');
-function openMgr(){ els.mgrText.value = JSON.stringify(SONGS, null, 2); mgr.showModal(); }
-function applyMgr(){
-  try{
-    const arr = JSON.parse(els.mgrText.value);
-    if(!Array.isArray(arr)) throw new Error("JSON must be an array");
-    SONGS = uniqById(arr.map(s=>({
-      id: String(s.id || `${s.artist}-${s.title}`).toLowerCase().replace(/\s+/g,'-'),
-      artist: s.artist ?? "", title: s.title ?? "", youtubeId: s.youtubeId ?? "",
-      tags: Array.isArray(s.tags)?s.tags:[], year: s.year?Number(s.year):undefined,
-      group: s.group ?? undefined, company: s.company ?? undefined,
-      gender: s.gender ?? undefined, debut: !!s.debut,
-      highlight: s.highlight!=null ? Number(s.highlight) : undefined,
-      songStart: s.songStart!=null ? Number(s.songStart) : undefined
-    })));
-    saveSongs(SONGS);
-    DYN = buildDynamicTagCategories(SONGS);
-    refreshCategoryDropdown();
-    mgr.close();
-    nextPair(false);
-  }catch(e){ alert("Invalid JSON: " + e.message); }
+/* ---------- Hard Refresh (cache-busting) ---------- */
+function hardRefresh(){
+  try { if ('caches' in window) { caches.keys().then(keys => keys.forEach(k => caches.delete(k))); } } catch(_) {}
+  try { if ('serviceWorker' in navigator) { navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister())); } } catch(_) {}
+  const url = new URL(window.location.href);
+  url.searchParams.set('v', Date.now().toString());
+  window.location.replace(url.toString());
 }
-function exportJSON(){
-  const blob = new Blob([JSON.stringify(SONGS, null, 2)], {type:"application/json"});
-  const url = URL.createObjectURL(blob); const a=document.createElement('a');
-  a.href=url; a.download='kpop-sodo-songs.json'; a.click(); URL.revokeObjectURL(url);
-}
-function resetDemo(){
-  if(!confirm("Reset to the demo dataset?")) return;
-  SONGS = DEMO_SONGS.slice(); saveSongs(SONGS);
-  DYN = buildDynamicTagCategories(SONGS); refreshCategoryDropdown();
-  els.mgrText.value = JSON.stringify(SONGS, null, 2);
-}
-els.fileInput.addEventListener('change', (ev)=>{
-  const f=ev.target.files?.[0]; if(!f) return;
-  const r=new FileReader(); r.onload=()=>{ els.mgrText.value=String(r.result||''); }; r.readAsText(f);
-});
 
 /* ---------- Wire up ---------- */
 els.categorySelect.addEventListener('change', ()=>{ updateCategoryUI(); setRuleLabel(els.categorySelect.value); });
 els.yearInput.addEventListener('input', ()=> setRuleLabel('year'));
 els.letterInput.addEventListener('input', ()=>{ els.letterInput.value = els.letterInput.value.toUpperCase(); setRuleLabel('startsWith'); });
 document.getElementById('btnNewPair').addEventListener('click', ()=> nextPair(els.championMode.checked));
+document.getElementById('btnHardRefresh').addEventListener('click', hardRefresh);
 els.saveLeft.addEventListener('click', ()=> choose('left'));
 els.saveRight.addEventListener('click', ()=> choose('right'));
-els.mgrBtn.addEventListener('click', openMgr);
-els.mgrApply.addEventListener('click', applyMgr);
-els.mgrExport.addEventListener('click', exportJSON);
-els.mgrReset.addEventListener('click', resetDemo);
-els.toggleHighlight.addEventListener('change', ()=>{  // re-embed at new start time
-  if(currentPair[0]) applySongToSide(currentPair[0],'left');
-  if(currentPair[1]) applySongToSide(currentPair[1],'right');
+
+/* Reveal buttons */
+els.revealLeft.addEventListener('click', ()=> revealSide('left'));
+els.revealRight.addEventListener('click', ()=> revealSide('right'));
+
+/* Start-at-highlight toggle updates pending/revealed players */
+els.toggleHighlight.addEventListener('change', ()=>{
+  ['left','right'].forEach(side=>{
+    const p = pending[side];
+    if (!p) return;
+    const song = p.song;
+    p.url = embedUrl(song.youtubeId, startSecondsFor(song));
+    if (revealed[side]) {
+      els[side].frame.src = p.url;
+    }
+  });
+});
+
+/* Auto reveal toggles */
+els.autoReveal.addEventListener('change', ()=>{
+  if (els.autoReveal.checked) scheduleAutoReveal();
+  else clearAllAutoTimers();
+});
+els.revealOrder.addEventListener('change', ()=>{
+  if (els.autoReveal.checked) scheduleAutoReveal();
 });
 
 /* ---------- Init ---------- */
-refreshCategoryDropdown();                   // builds dropdown with dynamic tag categories
-els.categorySelect.value = "random";         // default to random
+refreshCategoryDropdown();
+els.categorySelect.value = "random";
 setRuleLabel("random");
 nextPair(false);
 </script>
