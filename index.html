@@ -143,20 +143,23 @@
 <script>
 /* ---------- Demo songs (added highlight/songStart fields) ---------- */
 const DEMO_SONGS = [
-  { id:"lesserafim-crazy", artist:"LE SSERAFIM", group:"LE SSERAFIM", gender:"girls", company:"HYBE", title:"Crazy", year:2024, debut:false, youtubeId:"n6B5gQXlB-0", tags:["Letter: C","Concept: Dark"], highlight:64, songStart:0 },
-  { id:"aespa-whiplash", artist:"aespa", group:"aespa", gender:"girls", company:"SM", title:"Whiplash", year:2024, debut:false, youtubeId:"3S8eUeY9_2c", tags:["Letter: W"], highlight:35, songStart:0 },
-  { id:"newjeans-omg", artist:"NewJeans", group:"NewJeans", gender:"girls", company:"HYBE", title:"OMG", year:2023, debut:false, youtubeId:"gZdVCgC2x7k", tags:["Letter: O"], highlight:53, songStart:0 },
-  { id:"ive-eleven", artist:"IVE", group:"IVE", gender:"girls", company:"Starship", title:"ELEVEN", year:2021, debut:true, youtubeId:"Y8JFxS1HlDo", tags:["Letter: E","Debut: Yes"], highlight:47, songStart:0 },
-  { id:"itzy-dalla", artist:"ITZY", group:"ITZY", gender:"girls", company:"JYP", title:"DALLA DALLA", year:2019, debut:true, youtubeId:"pNfTK39k55U", tags:["Letter: D","Debut: Yes"], highlight:30, songStart:0 },
-  { id:"twice-tth", artist:"TWICE", group:"TWICE", gender:"girls", company:"JYP", title:"Talk That Talk", year:2022, debut:false, youtubeId:"k6jqx9kZgPM", tags:["Letter: T"], highlight:34, songStart:0 },
-  { id:"idle-queencard", artist:"(G)I-DLE", group:"(G)I-DLE", gender:"girls", company:"CUBE", title:"Queencard", year:2023, debut:false, youtubeId:"fCO7f0SmrDc", tags:["Letter: Q"], highlight:40, songStart:0 },
+  { id:"lesserafim-crazy", artist:"LE SSERAFIM", group:"LE SSERAFIM", gender:"girls", company:"HYBE", title:"Crazy", year:2024, debut:false, youtubeId:"n6B5gQXlB-0", tags:["Letter: C"], highlight:64, songStart:0 },
+  { id:"aespa-whiplash", artist:"aespa", group:"aespa", gender:"girls", company:"SM", title:"Whiplash", year:2024, debut:false, youtubeId:"jWQx2f-CErU", tags:["Letter: W"], highlight:36, songStart:0 },
+  { id:"newjeans-omg", artist:"NewJeans", group:"NewJeans", gender:"girls", company:"HYBE", title:"OMG", year:2023, debut:false, youtubeId:"sVTy_wmn5SU", tags:["Letter: O"], highlight:45, songStart:0 },
+  { id:"ive-eleven", artist:"IVE", group:"IVE", gender:"girls", company:"Starship", title:"LOVE DIVE", year:2021, debut:false, youtubeId:"Y8JFxS1HlDo", tags:["Letter: L"], highlight:54, songStart:0 },
+  { id:"itzy-dalla", artist:"ITZY", group:"ITZY", gender:"girls", company:"JYP", title:"DALLA DALLA", year:2019, debut:true, youtubeId:"pNfTK39k55U", tags:["Letter: D","Debut"], highlight:69, songStart:0 },
+  { id:"twice-tth", artist:"TWICE", group:"TWICE", gender:"girls", company:"JYP", title:"Talk That Talk", year:2022, debut:false, youtubeId:"k6jqx9kZgPM", tags:["Letter: T"], highlight:57, songStart:0 },
+  { id:"idle-queencard", artist:"(G)I-DLE", group:"(G)I-DLE", gender:"girls", company:"CUBE", title:"Queencard", year:2023, debut:false, youtubeId:"7HDeem-JaSY", tags:["Letter: Q"], highlight:61, songStart:0 },
+  { id:"illit-magnetic", artist:"ILLIT", group:"ILLIT", gender:"girls", company:"HYBE", title:"Magnetic", year:2024, debut:true, youtubeId:"n6B5gQXlB-0", tags:["Letter: M", "Debut"], highlight:97, songStart:0 },
+  { id:"illit-jellyous", artist:"ILLIT", group:"ILLIT", gender:"girls", company:"HYBE", title:"jellyous", year:2025, debut:false, youtubeId:"GkG60kISnfc", tags:["Letter: J"], highlight:49, songStart:0 },
+  { id:"illit-dtd", artist:"ILLIT", group:"ILLIT", gender:"girls", company:"HYBE", title:"Billyeoon Goyangi (Do the Dance)", year:2025, debut:false, youtubeId:"negtrQu5mTA", tags:["Letter: B"], highlight:70, songStart:0 },
 
   { id:"txt-chasing", artist:"TOMORROW X TOGETHER", group:"TXT", gender:"boys", company:"HYBE", title:"Chasing That Feeling", year:2023, debut:false, youtubeId:"k_e2oJzoLw0", tags:["Letter: C"], highlight:37, songStart:0 },
   { id:"nct-baggy", artist:"NCT U", group:"NCT", gender:"boys", company:"SM", title:"Baggy Jeans", year:2023, debut:false, youtubeId:"PEMndV4J2K0", tags:["Letter: B"], highlight:28, songStart:0 },
   { id:"straykids-lalalala", artist:"Stray Kids", group:"Stray Kids", gender:"boys", company:"JYP", title:"LALALALA", year:2023, debut:false, youtubeId:"JsOOis4bBFg", tags:["Letter: L"], highlight:32, songStart:0 },
   { id:"enhypen-drunk", artist:"ENHYPEN", group:"ENHYPEN", gender:"boys", company:"HYBE", title:"Drunk-Dazed", year:2021, debut:false, youtubeId:"Fc7-Oe0tj5k", tags:["Letter: D"], highlight:44, songStart:0 },
   { id:"shinee-lucifer", artist:"SHINee", group:"SHINee", gender:"boys", company:"SM", title:"Lucifer", year:2010, debut:false, youtubeId:"DTBXb4QK3v4", tags:["Letter: L"], highlight:52, songStart:0 },
-  { id:"exo-mama", artist:"EXO", group:"EXO", gender:"boys", company:"SM", title:"MAMA", year:2012, debut:true, youtubeId:"KH6ZwnqZ7Wo", tags:["Letter: M","Debut: Yes"], highlight:40, songStart:5 }
+  
 ];
 
 /* ---------- Storage ---------- */
@@ -205,6 +208,7 @@ const StaticCats = {
   girlsVgirls:{ label:"Girls vs Girls", genPairs(s){return pairWhere(s,a=>a.gender==="girls",b=>b.gender==="girls",true);}},
   boysVboys:  { label:"Boys vs Boys",  genPairs(s){return pairWhere(s,a=>a.gender==="boys",b=>b.gender==="boys",true);}},
   companySMvJYP:{label:"SM Ent. vs JYP Ent.", genPairs(s){return pairWhere(s,a=>a.company==="SM",b=>b.company==="JYP");}},
+  companySMvHYBE:{label:"SM Ent. vs HYBE", genPairs(s){return pairWhere(s,a=>a.company==="SM",b=>b.company==="HYBE");}},
   sameYear:   { label:"Same Release Year", genPairs(s){return allPairs(s).filter(([a,b])=>a.year&&b.year&&a.year===b.year);}},
   year:       { label:(y)=>`Year ${y}`, genPairs(s,o){const y=Number(o?.year);return allPairs(s.filter(x=>x.year===y));}},
   startsWith: { label:(L)=>`Starts with the letter ${String(L||"").toUpperCase()}`,
