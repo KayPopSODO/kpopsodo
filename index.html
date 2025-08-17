@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>K-Pop Save One • Drop One</title>
+<style>
+  :root{
+    --left:#FFC328; --right:#2F81FF; --panel:#0b0b14; --card:#ffffff;
+    --ink:#0e0e14; --muted:#6b7280; --accent:#00e676; --danger:#ff3b3b; --radius:22px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+    background:linear-gradient(90deg,var(--left),var(--right));
+    color:#fff; display:flex; flex-direction:column
+  }
+  header{padding:10px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px}
+  .brand{font-weight:900; letter-spacing:.5px; display:flex; align-items:center; gap:10px}
+  .brand .pill{background:#111; padding:6px 10px; border-radius:999px; font-size:12px; color:#aaa}
+  .controls{display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:flex-end}
+  select,input[type="text"],input[type="number"]{
+    appearance:none; border:none; outline:none; background:#111827; color:#e5e7eb;
+    padding:10px 12px; border-radius:10px; min-width:180px
+  }
+  button{border:none; background:#111; color:#fff; padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:700}
+  .btn-accent{background:var(--accent); color:#022b1a}
+  .btn-ghost{background:#111827}
+  .btn-danger{background:var(--danger)}
+  .tog{display:flex; align-items:center; gap:8px; background:#111827; border-radius:999px; padding:6px 10px; cursor:pointer; user-select:none}
+  .tog input{display:none}
+  .dot{width:18px; height:18px; border-radius:999px; background:#333}
+  .tog input:checked + .dot{background:var(--accent)}
+  .bar{padding:6px 14px; background:#0b0b14; color:#cbd5e1; border-radius:999px; font-weight:700}
+  .arena{flex:1; display:grid; grid-template-columns:1fr 80px 1fr; gap:12px; padding:14px; min-height:0}
+  .side{background:rgba(255,255,255,.15); border-radius:var(--radius); padding:16px; display:flex; flex-direction:column; gap:12px; backdrop-filter:blur(6px)}
+  .side.left{background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.25)),var(--left)}
+  .side.right{background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.25)),var(--right)}
+  .frame{background:#fff; border-radius:20px; padding:10px; box-shadow:0 10px 30px rgba(0,0,0,.25);
+         aspect-ratio:16/9; display:flex; align-items:center; justify-content:center}
+  .frame iframe{width:100%; height:100%; border:0; border-radius:12px}
+  .meta{text-align:center; background:#00000055; padding:10px; border-radius:12px}
+  .artist{font-size:20px; font-weight:900; line-height:1.1}
+  .title{font-size:16px; opacity:.95}
+  .tags{margin-top:6px; display:flex; flex-wrap:wrap; gap:6px; justify-content:center}
+  .tag{background:#0b0b14; color:#cbd5e1; font-size:12px; padding:4px 8px; border-radius:999px}
+  .actions{display:flex; gap:10px; justify-content:center; flex-wrap:wrap}
+  .vs{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px}
+  .vsBadge{font-size:44px; font-weight:900; background:#0b0b14; padding:10px 18px; border-radius:18px; box-shadow:0 10px 30px rgba(0,0,0,.25)}
+  .rule{text-align:center; background:#0b0b14; color:#9ae6b4; padding:8px 12px; border-radius:999px; font-weight:900; font-size:14px}
+  .sub{color:#cbd5e1; font-size:12px}
+  dialog{border:none; padding:0; border-radius:16px; width:min(1000px,92vw); max-height:90vh; box-shadow:0 20px 80px rgba(0,0,0,.5); overflow:hidden}
+  .modalHead{display:flex; justify-content:space-between; align-items:center; padding:12px 14px; background:#0b0b14; color:#fff}
+  .modalBody{padding:14px; background:#0f172a}
+  textarea{width:100%; min-height:40vh; background:#0b1020; color:#e5e7eb; border:none; border-radius:12px; padding:12px; resize:vertical;
+           font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12.5px; line-height:1.4}
+  .small{font-size:12px; color:#9ca3af}
+  .flex{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+  .grow{flex:1}
+  footer{padding:8px 14px; display:flex; gap:8px; justify-content:flex-end; background:#0b0b14}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <span style="font-size:22px">🎵 Save One • Drop One</span>
+    <span class="pill">K-Pop Edition</span>
+  </div>
+  <div class="controls">
+    <span class="bar" id="categoryLabel">Category: —</span>
+
+    <select id="categorySelect" title="Category">
+      <!-- filled at runtime -->
+    </select>
+
+    <input id="yearInput" type="number" placeholder="Year (e.g., 2024)" style="display:none;width:140px"/>
+    <input id="letterInput" type="text" maxlength="1" placeholder="Letter (A-Z)" style="display:none;width:120px;text-transform:uppercase"/>
+
+    <label class="tog">
+      <input id="toggleHighlight" type="checkbox" checked />
+      <span class="dot"></span>
+      <span class="sub">Start at highlight</span>
+    </label>
+
+    <label class="tog"><input id="championMode" type="checkbox"/><span class="dot"></span><span class="sub">Champion mode</span></label>
+
+    <button class="btn-ghost" id="btnNewPair">New Pair</button>
+    <button class="btn-accent" id="btnSongMgr">Song Manager</button>
+  </div>
+</header>
+
+<main class="arena">
+  <section class="side left" id="leftCard">
+    <div class="frame"><iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>
+    <div class="meta">
+      <div class="artist" id="leftArtist">—</div>
+      <div class="title" id="leftTitle">—</div>
+      <div class="tags" id="leftTags"></div>
+    </div>
+    <div class="actions"><button class="btn-accent" id="saveLeft">Save Left</button></div>
+  </section>
+
+  <section class="vs">
+    <div class="rule" id="ruleBadge">RULE</div>
+    <div class="vsBadge">VS</div>
+    <div class="sub" id="score">Choices: 0</div>
+  </section>
+
+  <section class="side right" id="rightCard">
+    <div class="frame"><iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>
+    <div class="meta">
+      <div class="artist" id="rightArtist">—</div>
+      <div class="title" id="rightTitle">—</div>
+      <div class="tags" id="rightTags"></div>
+    </div>
+    <div class="actions"><button class="btn-accent" id="saveRight">Save Right</button></div>
+  </section>
+</main>
+
+<!-- Song Manager -->
+<dialog id="mgr">
+  <div class="modalHead"><strong>Song Manager</strong><button onclick="mgr.close()">✕</button></div>
+  <div class="modalBody">
+    <div class="small" style="margin-bottom:8px">
+      Each song supports: <code>{ id, artist, title, youtubeId, tags, year, group, company, gender, debut, highlight, songStart }</code>.<br>
+      <b>Tags become categories automatically</b> when a tag appears on 2+ songs (e.g., <code>"Letter: C"</code>).<br>
+      <b>highlight</b> = seconds for the “Start at highlight” toggle. <b>songStart</b> = seconds for real song beginning (optional).
+    </div>
+    <textarea id="mgrText"></textarea>
+    <div style="margin:10px 0" class="flex">
+      <input type="file" id="fileInput" accept=".json"/>
+      <span class="grow"></span>
+      <button class="btn-ghost" id="btnExport">Export JSON</button>
+      <button class="btn-accent" id="btnApply">Apply</button>
+      <button class="btn-danger" id="btnReset">Reset to Demo Set</button>
+    </div>
+  </div>
+  <footer><span class="small" style="margin-right:auto">Data stays in your browser (localStorage).</span><button class="btn-ghost" onclick="mgr.close()">Close</button></footer>
+</dialog>
+
+<script>
+/* ---------- Demo songs (added highlight/songStart fields) ---------- */
+const DEMO_SONGS = [
+  { id:"lesserafim-crazy", artist:"LE SSERAFIM", group:"LE SSERAFIM", gender:"girls", company:"HYBE", title:"Crazy", year:2024, debut:false, youtubeId:"n6B5gQXlB-0", tags:["Letter: C","Concept: Dark"], highlight:64, songStart:0 },
+  { id:"aespa-whiplash", artist:"aespa", group:"aespa", gender:"girls", company:"SM", title:"Whiplash", year:2024, debut:false, youtubeId:"3S8eUeY9_2c", tags:["Letter: W"], highlight:35, songStart:0 },
+  { id:"newjeans-omg", artist:"NewJeans", group:"NewJeans", gender:"girls", company:"HYBE", title:"OMG", year:2023, debut:false, youtubeId:"gZdVCgC2x7k", tags:["Letter: O"], highlight:53, songStart:0 },
+  { id:"ive-eleven", artist:"IVE", group:"IVE", gender:"girls", company:"Starship", title:"ELEVEN", year:2021, debut:true, youtubeId:"Y8JFxS1HlDo", tags:["Letter: E","Debut: Yes"], highlight:47, songStart:0 },
+  { id:"itzy-dalla", artist:"ITZY", group:"ITZY", gender:"girls", company:"JYP", title:"DALLA DALLA", year:2019, debut:true, youtubeId:"pNfTK39k55U", tags:["Letter: D","Debut: Yes"], highlight:30, songStart:0 },
+  { id:"twice-tth", artist:"TWICE", group:"TWICE", gender:"girls", company:"JYP", title:"Talk That Talk", year:2022, debut:false, youtubeId:"k6jqx9kZgPM", tags:["Letter: T"], highlight:34, songStart:0 },
+  { id:"idle-queencard", artist:"(G)I-DLE", group:"(G)I-DLE", gender:"girls", company:"CUBE", title:"Queencard", year:2023, debut:false, youtubeId:"fCO7f0SmrDc", tags:["Letter: Q"], highlight:40, songStart:0 },
+
+  { id:"txt-chasing", artist:"TOMORROW X TOGETHER", group:"TXT", gender:"boys", company:"HYBE", title:"Chasing That Feeling", year:2023, debut:false, youtubeId:"k_e2oJzoLw0", tags:["Letter: C"], highlight:37, songStart:0 },
+  { id:"nct-baggy", artist:"NCT U", group:"NCT", gender:"boys", company:"SM", title:"Baggy Jeans", year:2023, debut:false, youtubeId:"PEMndV4J2K0", tags:["Letter: B"], highlight:28, songStart:0 },
+  { id:"straykids-lalalala", artist:"Stray Kids", group:"Stray Kids", gender:"boys", company:"JYP", title:"LALALALA", year:2023, debut:false, youtubeId:"JsOOis4bBFg", tags:["Letter: L"], highlight:32, songStart:0 },
+  { id:"enhypen-drunk", artist:"ENHYPEN", group:"ENHYPEN", gender:"boys", company:"HYBE", title:"Drunk-Dazed", year:2021, debut:false, youtubeId:"Fc7-Oe0tj5k", tags:["Letter: D"], highlight:44, songStart:0 },
+  { id:"shinee-lucifer", artist:"SHINee", group:"SHINee", gender:"boys", company:"SM", title:"Lucifer", year:2010, debut:false, youtubeId:"DTBXb4QK3v4", tags:["Letter: L"], highlight:52, songStart:0 },
+  { id:"exo-mama", artist:"EXO", group:"EXO", gender:"boys", company:"SM", title:"MAMA", year:2012, debut:true, youtubeId:"KH6ZwnqZ7Wo", tags:["Letter: M","Debut: Yes"], highlight:40, songStart:5 }
+];
+
+/* ---------- Storage ---------- */
+const STORAGE_KEY = "kpop_sodo_songs_v3"; // bumped key since schema grew
+const loadSongs = ()=> {
+  try{
+    const r=localStorage.getItem(STORAGE_KEY);
+    if(!r){ localStorage.setItem(STORAGE_KEY, JSON.stringify(DEMO_SONGS)); return DEMO_SONGS.slice(); }
+    const a=JSON.parse(r);
+    return Array.isArray(a)?a:DEMO_SONGS.slice();
+  }catch{ return DEMO_SONGS.slice(); }
+};
+const saveSongs = (arr)=> localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+
+/* ---------- Helpers ---------- */
+const rand = (n)=>Math.floor(Math.random()*n);
+const sample = (arr)=> arr.length?arr[rand(arr.length)]:null;
+const uniqById = (arr)=>[...new Map(arr.map(x=>[x.id,x])).values()];
+const escapeHtml = (s)=>String(s).replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
+function embedUrl(yid, startSec){
+  const base=`https://www.youtube-nocookie.com/embed/${yid}?autoplay=0&modestbranding=1&rel=0`;
+  const start = (startSec && startSec>0) ? `&start=${Math.floor(startSec)}` : "";
+  return base + start;
+}
+
+/* ---------- Tag normalization ---------- */
+function normTag(t){
+  const pretty = String(t).trim();
+  const [k,...rest] = pretty.split(":");
+  const v = rest.join(":");
+  const key = (k||"").trim().toLowerCase();
+  const val = (v||"").trim().toLowerCase();
+  const norm = `${key}:${val}`;
+  return { pretty, key, val, norm };
+}
+function songHasNormTag(song, normStr){
+  if(!song.tags) return false;
+  return song.tags.some(t=> normTag(t).norm === normStr);
+}
+
+/* ---------- Static categories ---------- */
+const StaticCats = {
+  random: { label: "Random (each round)", genPairs(){ return []; } }, // handled specially
+  any:    { label: "Any", genPairs(songs){ return allPairs(songs); } },
+  boysVgirls: { label:"Boys vs Girls", genPairs(s){return pairWhere(s,a=>a.gender==="boys",b=>b.gender==="girls");}},
+  girlsVgirls:{ label:"Girls vs Girls", genPairs(s){return pairWhere(s,a=>a.gender==="girls",b=>b.gender==="girls",true);}},
+  boysVboys:  { label:"Boys vs Boys",  genPairs(s){return pairWhere(s,a=>a.gender==="boys",b=>b.gender==="boys",true);}},
+  companySMvJYP:{label:"SM Ent. vs JYP Ent.", genPairs(s){return pairWhere(s,a=>a.company==="SM",b=>b.company==="JYP");}},
+  sameYear:   { label:"Same Release Year", genPairs(s){return allPairs(s).filter(([a,b])=>a.year&&b.year&&a.year===b.year);}},
+  year:       { label:(y)=>`Year ${y}`, genPairs(s,o){const y=Number(o?.year);return allPairs(s.filter(x=>x.year===y));}},
+  startsWith: { label:(L)=>`Starts with the letter ${String(L||"").toUpperCase()}`,
+                genPairs(s,o){const L=String(o?.letter||"").toUpperCase();return allPairs(s.filter(x=>x.title?.toUpperCase().startsWith(L)));}},
+  debut:      { label:"Debut Songs", genPairs(s){return allPairs(s.filter(x=>x.debut===true));}},
+  sameGroup:  { label:"Same Group", genPairs(s){return allPairs(s).filter(([a,b])=>a.group&&b.group&&a.group===b.group);}},
+};
+
+/* ---------- Dynamic categories from tags ---------- */
+function buildDynamicTagCategories(songs){
+  const counts = new Map(); // normTag -> {pretty,count}
+  for(const s of songs){
+    for(const t of (s.tags||[])){
+      const nt = normTag(t);
+      const rec = counts.get(nt.norm) || { pretty: nt.pretty, count:0 };
+      rec.count++; counts.set(nt.norm, rec);
+    }
+  }
+  const dyn = {};
+  for(const [norm, rec] of counts){
+    if(rec.count >= 2){
+      const key = `tag|${norm}`; // e.g., tag|letter:c
+      dyn[key] = {
+        label: rec.pretty,
+        genPairs(songs){
+          const pool = songs.filter(s=>songHasNormTag(s, norm));
+          return allPairs(pool);
+        }
+      };
+    }
+  }
+  return dyn;
+}
+
+/* ---------- Pair helpers ---------- */
+function allPairs(list){
+  const res=[]; for(let i=0;i<list.length;i++){ for(let j=i+1;j<list.length;j++){ res.push([list[i],list[j]]); } } return res;
+}
+function pairWhere(songs, predA, predB, allowSame=false){
+  const A=songs.filter(predA), B=songs.filter(predB), out=[];
+  for(const a of A){ for(const b of B){ if(!allowSame && a.id===b.id) continue; out.push([a,b]); } }
+  return out;
+}
+
+/* ---------- App state ---------- */
+let SONGS = loadSongs();
+let DYN = buildDynamicTagCategories(SONGS);   // dynamic tag categories
+let currentPair=[null,null], champion=null, picks=0, currentCatKey=null;
+
+const els={
+  categorySelect:document.getElementById('categorySelect'),
+  yearInput:document.getElementById('yearInput'),
+  letterInput:document.getElementById('letterInput'),
+  categoryLabel:document.getElementById('categoryLabel'),
+  ruleBadge:document.getElementById('ruleBadge'),
+  left:{ frame:document.querySelector('#leftCard iframe'), artist:document.getElementById('leftArtist'), title:document.getElementById('leftTitle'), tags:document.getElementById('leftTags') },
+  right:{ frame:document.querySelector('#rightCard iframe'), artist:document.getElementById('rightArtist'), title:document.getElementById('rightTitle'), tags:document.getElementById('rightTags') },
+  saveLeft:document.getElementById('saveLeft'),
+  saveRight:document.getElementById('saveRight'),
+  score:document.getElementById('score'),
+  newPair:document.getElementById('btnNewPair'),
+  championMode:document.getElementById('championMode'),
+  toggleHighlight:document.getElementById('toggleHighlight'),
+  mgrBtn:document.getElementById('btnSongMgr'),
+  mgr:document.getElementById('mgr'),
+  mgrText:document.getElementById('mgrText'),
+  mgrApply:document.getElementById('btnApply'),
+  mgrExport:document.getElementById('btnExport'),
+  mgrReset:document.getElementById('btnReset'),
+  fileInput:document.getElementById('fileInput'),
+};
+
+/* ---------- Category UI ---------- */
+function refreshCategoryDropdown(){
+  const sel = els.categorySelect;
+  sel.innerHTML = "";
+  const add = (value,label,disabled=false)=> {
+    const o=document.createElement('option'); o.value=value; o.textContent=label; if(disabled)o.disabled=true; sel.appendChild(o);
+  };
+  add("random","🎲 Random (each round)");
+  add("any","Any");
+  add("boysVgirls","Boys vs Girls");
+  add("girlsVgirls","Girls vs Girls");
+  add("boysVboys","Boys vs Boys");
+  add("companySMvJYP","SM Ent. vs JYP Ent.");
+  add("sameYear","Same Release Year");
+  add("year","Specific Year…");
+  add("startsWith","Starts with Letter…");
+  add("debut","Debut Songs");
+  add("sameGroup","Same Group");
+  add("sep","— Tags as Categories —", true);
+
+  for(const key of Object.keys(DYN).sort()){
+    add(key, DYN[key].label);
+  }
+
+  sel.value = "random"; // default to random
+  updateCategoryUI();
+}
+function updateCategoryUI(){
+  const val = els.categorySelect.value;
+  els.yearInput.style.display = (val==="year") ? "inline-block" : "none";
+  els.letterInput.style.display = (val==="startsWith") ? "inline-block" : "none";
+}
+
+/* ---------- Start-time helpers ---------- */
+function startSecondsFor(song){
+  const useHighlight = els.toggleHighlight.checked;
+  const highlight = Number(song.highlight||0);
+  const songStart = Number(song.songStart||0);
+  return useHighlight ? highlight : songStart;
+}
+
+/* ---------- Round logic ---------- */
+function getRuleLabelFromKey(key){
+  if(key?.startsWith("tag|")) return DYN[key]?.label || "Tag";
+  const cat = StaticCats[key] || StaticCats.any;
+  if (key==="year") return StaticCats.year.label(els.yearInput.value||"—");
+  if (key==="startsWith") return StaticCats.startsWith.label((els.letterInput.value||"—").toUpperCase());
+  return typeof cat.label==="function" ? cat.label() : cat.label;
+}
+function setRuleLabel(key){
+  const label = getRuleLabelFromKey(key);
+  els.categoryLabel.textContent = "Category: " + label;
+  els.ruleBadge.textContent = label.toUpperCase();
+}
+function availableRandomKeys(){
+  const base = ["any","boysVgirls","girlsVgirls","boysVboys","companySMvJYP","sameYear","debut","sameGroup"];
+  const dyn = Object.keys(DYN);
+  return [...base, ...dyn];
+}
+function nextPair(keepChampion=false){
+  const chosenKey = (els.categorySelect.value==="random" && !keepChampion)
+    ? sample(availableRandomKeys())
+    : (keepChampion ? currentCatKey : els.categorySelect.value);
+
+  currentCatKey = chosenKey;
+
+  const cat = chosenKey.startsWith("tag|") ? DYN[chosenKey]
+              : (StaticCats[chosenKey] || StaticCats.any);
+  const opts = { year:Number(els.yearInput.value||0), letter:(els.letterInput.value||"").toUpperCase() };
+  const pairs = cat.genPairs(SONGS, opts) || [];
+
+  if (!pairs.length){ alert("No pairs match this category. Add more songs or change the rule."); return; }
+
+  let pair;
+  if (keepChampion && champion){
+    const filtered = pairs.filter(([a,b])=>a.id===champion.id || b.id===champion.id);
+    pair = sample(filtered.length?filtered:pairs);
+  } else {
+    pair = sample(pairs);
+    champion = null;
+  }
+  if (Math.random()<0.5) pair = [pair[1], pair[0]];
+  currentPair = pair;
+
+  applySongToSide(pair[0], 'left');
+  applySongToSide(pair[1], 'right');
+  setRuleLabel(chosenKey);
+}
+function applySongToSide(song, side){
+  const dest = els[side];
+  const startAt = startSecondsFor(song);
+  dest.frame.src = song ? embedUrl(song.youtubeId, startAt) : "";
+  dest.artist.textContent = song ? song.artist : "—";
+  dest.title.textContent  = song ? song.title  : "—";
+  dest.tags.innerHTML = song ? renderTags(song) : "";
+}
+function renderTags(s){
+  const chips=[];
+  if (s.group) chips.push(`<span class="tag">Group: ${escapeHtml(s.group)}</span>`);
+  if (s.company) chips.push(`<span class="tag">Company: ${escapeHtml(s.company)}</span>`);
+  if (s.gender) chips.push(`<span class="tag">${escapeHtml(s.gender)}</span>`);
+  if (s.year) chips.push(`<span class="tag">Year: ${s.year}</span>`);
+  if (s.debut) chips.push(`<span class="tag">Debut</span>`);
+  if (s.highlight!=null) chips.push(`<span class="tag">Highlight: ${Math.floor(s.highlight)}s</span>`);
+  if (s.songStart) chips.push(`<span class="tag">Song start: ${Math.floor(s.songStart)}s</span>`);
+  (s.tags||[]).forEach(t=> chips.push(`<span class="tag">${escapeHtml(t)}</span>`));
+  return chips.join("");
+}
+function choose(side){
+  const winner = (side==='left') ? currentPair[0] : currentPair[1];
+  champion = els.championMode.checked ? winner : null;
+  picks++; els.score.textContent = `Choices: ${picks}`;
+  nextPair(els.championMode.checked);
+}
+
+/* ---------- Song Manager ---------- */
+const mgr = document.getElementById('mgr');
+function openMgr(){ els.mgrText.value = JSON.stringify(SONGS, null, 2); mgr.showModal(); }
+function applyMgr(){
+  try{
+    const arr = JSON.parse(els.mgrText.value);
+    if(!Array.isArray(arr)) throw new Error("JSON must be an array");
+    SONGS = uniqById(arr.map(s=>({
+      id: String(s.id || `${s.artist}-${s.title}`).toLowerCase().replace(/\s+/g,'-'),
+      artist: s.artist ?? "", title: s.title ?? "", youtubeId: s.youtubeId ?? "",
+      tags: Array.isArray(s.tags)?s.tags:[], year: s.year?Number(s.year):undefined,
+      group: s.group ?? undefined, company: s.company ?? undefined,
+      gender: s.gender ?? undefined, debut: !!s.debut,
+      highlight: s.highlight!=null ? Number(s.highlight) : undefined,
+      songStart: s.songStart!=null ? Number(s.songStart) : undefined
+    })));
+    saveSongs(SONGS);
+    DYN = buildDynamicTagCategories(SONGS);
+    refreshCategoryDropdown();
+    mgr.close();
+    nextPair(false);
+  }catch(e){ alert("Invalid JSON: " + e.message); }
+}
+function exportJSON(){
+  const blob = new Blob([JSON.stringify(SONGS, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob); const a=document.createElement('a');
+  a.href=url; a.download='kpop-sodo-songs.json'; a.click(); URL.revokeObjectURL(url);
+}
+function resetDemo(){
+  if(!confirm("Reset to the demo dataset?")) return;
+  SONGS = DEMO_SONGS.slice(); saveSongs(SONGS);
+  DYN = buildDynamicTagCategories(SONGS); refreshCategoryDropdown();
+  els.mgrText.value = JSON.stringify(SONGS, null, 2);
+}
+els.fileInput.addEventListener('change', (ev)=>{
+  const f=ev.target.files?.[0]; if(!f) return;
+  const r=new FileReader(); r.onload=()=>{ els.mgrText.value=String(r.result||''); }; r.readAsText(f);
+});
+
+/* ---------- Wire up ---------- */
+els.categorySelect.addEventListener('change', ()=>{ updateCategoryUI(); setRuleLabel(els.categorySelect.value); });
+els.yearInput.addEventListener('input', ()=> setRuleLabel('year'));
+els.letterInput.addEventListener('input', ()=>{ els.letterInput.value = els.letterInput.value.toUpperCase(); setRuleLabel('startsWith'); });
+document.getElementById('btnNewPair').addEventListener('click', ()=> nextPair(els.championMode.checked));
+els.saveLeft.addEventListener('click', ()=> choose('left'));
+els.saveRight.addEventListener('click', ()=> choose('right'));
+els.mgrBtn.addEventListener('click', openMgr);
+els.mgrApply.addEventListener('click', applyMgr);
+els.mgrExport.addEventListener('click', exportJSON);
+els.mgrReset.addEventListener('click', resetDemo);
+els.toggleHighlight.addEventListener('change', ()=>{  // re-embed at new start time
+  if(currentPair[0]) applySongToSide(currentPair[0],'left');
+  if(currentPair[1]) applySongToSide(currentPair[1],'right');
+});
+
+/* ---------- Init ---------- */
+refreshCategoryDropdown();                   // builds dropdown with dynamic tag categories
+els.categorySelect.value = "random";         // default to random
+setRuleLabel("random");
+nextPair(false);
+</script>
+</body>
+</html>
