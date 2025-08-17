@@ -91,10 +91,24 @@
     background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,.55));
     border-radius:var(--radius);
     visibility:hidden; opacity:0; transition:opacity .2s ease;
+    pointer-events:none;                 /* <<< FIX: don't block clicks when hidden */
   }
-  .side.concealed .veil{visibility:visible; opacity:1}
+  .side.concealed .veil{
+    visibility:visible; opacity:1;
+    pointer-events:auto;                /* <<< Only clickable while concealed */
+  }
   .revealBtn{font-size:clamp(18px,2.4vw,22px); padding:14px 18px}
   .hint{font-size:12px; opacity:.8}
+
+  /* Modal */
+  dialog{border:none; padding:0; border-radius:16px; width:min(720px,92vw); max-height:90vh; overflow:auto; box-shadow:0 20px 80px rgba(0,0,0,.5)}
+  .modalHead{display:flex; justify-content:space-between; align-items:center; padding:12px 14px; background:#0b0b14; color:#fff}
+  .modalBody{padding:14px; background:#0f172a; color:#e5e7eb}
+  .row{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:10px}
+  .row > *{margin-right:6px}
+  .muted{color:#9ca3af; font-size:12px}
+  .spacer{height:8px}
+  footer.modalFoot{padding:10px 14px; display:flex; justify-content:flex-end; gap:8px; background:#0b0b14}
 
   /* Disabled vote buttons */
   button:disabled{opacity:.45; cursor:not-allowed}
@@ -116,27 +130,11 @@
 
     <select id="categorySelect" title="Category"></select>
 
-    <input id="yearInput" type="number" placeholder="Year (e.g., 2024)" style="display:none;width:140px"/>
-    <input id="letterInput" type="text" maxlength="1" placeholder="Letter (A-Z)" style="display:none;width:120px;text-transform:uppercase"/>
-
-    <label class="tog">
-      <input id="toggleHighlight" type="checkbox" checked />
-      <span class="dot"></span>
-      <span class="sub">Start at highlight</span>
-    </label>
-
-    <label class="tog"><input id="championMode" type="checkbox"/><span class="dot"></span><span class="sub">Champion mode</span></label>
-
-    <label class="tog"><input id="autoReveal" type="checkbox"/><span class="dot"></span><span class="sub">Auto reveal</span></label>
-
-    <select id="revealOrder" title="Reveal order">
-      <option value="random">Order: Random</option>
-      <option value="leftFirst">Order: Left → Right</option>
-      <option value="rightFirst">Order: Right → Left</option>
-    </select>
+    <input id="yearInput" type="number" placeholder="Year (e.g., 2024)" style="width:140px;display:none"/>
+    <input id="letterInput" type="text" maxlength="1" placeholder="Letter (A-Z)" style="width:120px;text-transform:uppercase;display:none"/>
 
     <button class="btn-ghost" id="btnNewPair">New Pair</button>
-    <button class="btn-ghost" id="btnHardRefresh" title="Force reload (cache-bust)">Hard Refresh</button>
+    <button class="btn-ghost" id="btnOptions">Options</button>
   </div>
 </header>
 
@@ -148,7 +146,9 @@
       <div class="title" id="leftTitle">—</div>
       <div class="tags" id="leftTags"></div>
     </div>
-    <div class="actions"><button class="btn-accent" id="saveLeft" disabled>Save Left</button></div>
+    <div class="actions">
+      <button class="btn-accent" id="saveLeft" disabled title="Reveal both sides to vote">Save Left</button>
+    </div>
     <div class="veil">
       <button class="btn-accent revealBtn" id="revealLeft">Reveal</button>
       <span class="hint">Tap to reveal before voting</span>
@@ -168,13 +168,66 @@
       <div class="title" id="rightTitle">—</div>
       <div class="tags" id="rightTags"></div>
     </div>
-    <div class="actions"><button class="btn-accent" id="saveRight" disabled>Save Right</button></div>
+    <div class="actions">
+      <button class="btn-accent" id="saveRight" disabled title="Reveal both sides to vote">Save Right</button>
+    </div>
     <div class="veil">
       <button class="btn-accent revealBtn" id="revealRight">Reveal</button>
       <span class="hint">Tap to reveal before voting</span>
     </div>
   </section>
 </main>
+
+<!-- Options Modal -->
+<dialog id="opts">
+  <div class="modalHead">
+    <strong>Options</strong>
+    <button class="btn-ghost" id="btnCloseOpts">✕</button>
+  </div>
+  <div class="modalBody">
+    <div class="row">
+      <label class="tog" title="Start the video at each song's highlight">
+        <input id="toggleHighlight" type="checkbox" checked />
+        <span class="dot"></span><span>Start at highlight</span>
+      </label>
+
+      <label class="tog" title="Keep the winner facing new challengers">
+        <input id="championMode" type="checkbox" />
+        <span class="dot"></span><span>Champion mode</span>
+      </label>
+    </div>
+
+    <div class="row">
+      <label class="tog" title="Automatically reveal both sides each round">
+        <input id="autoReveal" type="checkbox" />
+        <span class="dot"></span><span>Auto reveal</span>
+      </label>
+
+      <select id="revealOrder" title="Reveal order">
+        <option value="random">Order: Random</option>
+        <option value="leftFirst">Order: Left → Right</option>
+        <option value="rightFirst">Order: Right → Left</option>
+      </select>
+      <span class="muted">Controls which side reveals first while Auto reveal is on.</span>
+    </div>
+
+    <div class="row">
+      <label class="tog" title="Show song tags under each card">
+        <input id="showTags" type="checkbox" />
+        <span class="dot"></span><span>Show tags</span>
+      </label>
+    </div>
+
+    <div class="spacer"></div>
+    <div class="row">
+      <button class="btn-ghost" id="btnHardRefresh" title="Clear caches and reload">Hard Refresh</button>
+      <span class="muted">Useful if a deploy seems cached.</span>
+    </div>
+  </div>
+  <footer class="modalFoot">
+    <button class="btn-accent" id="btnDoneOpts">Done</button>
+  </footer>
+</dialog>
 
 <!-- SFX -->
 <audio id="sfxPop" src="pop.mp3" preload="auto"></audio>
@@ -200,14 +253,22 @@ const SONGS = Object.freeze([
   { id:"h2h-style", artist:"Hearts2Hearts", group:"Hearts2Hearts", gender:"girls", company:"SM", title:"Style", year:2025, debut:false, youtubeId:"n7kFRxFIPrI", tags:["Letter: S"], highlight:51, songStart:0, color:"#f59e0b" },
   { id:"illit-ticktack", artist:"ILLIT", group:"ILLIT", gender:"girls", company:"HYBE", title:"Tick-Tack", year:2024, debut:false, youtubeId:"-nEGVrzPaiU", tags:["Letter: T"], highlight:68, songStart:0, color:"#ffa9ca" },
   { id:"illit-cherish", artist:"ILLIT", group:"ILLIT", gender:"girls", company:"HYBE", title:"Cherish (My Love)", year:2024, debut:false, youtubeId:"tbDGl7jEazA", tags:["Letter: C", "Love"], highlight:52, songStart:0, color:"#c9024e" },
-  { id:"illit-lgs", artist:"ILLIT", group:"ILLIT", gender:"girls", company:"HYBE", title:"Lucky Girl Syndrome", year:2024, debut:false, youtubeId:"UCmgGZbfjmk", tags:["Letter: L"], highlight:38, songStart:0, color:"#c9024e" },
-
+  { id:"illit-lgs", artist:"ILLIT", group:"ILLIT", gender:"girls", company:"HYBE", title:"Lucky Girl Syndrome", year:2024, debut:false, youtubeId:"UCmgGZbfjmk", tags:["Letter: L", "Girl"], highlight:38, songStart:0, color:"#9fff81" },
+  { id:"bdc-fgirl", artist:"Baby DONT Cry", group:"Baby DONT Cry", gender:"girls", company:"P Nation", title:"F Girl", year:2025, debut:true, youtubeId:"fmGBeGSp7fs", tags:["Letter: F", "Girl"], highlight:61, songStart:0, color:"#ef242a" },
+  { id:"bdc-byr", artist:"Baby DONT Cry", group:"Baby DONT Cry", gender:"girls", company:"P Nation", title:"Bet You'll Regret It", year:2025, debut:false, youtubeId:"uWT79Qq52sU", tags:["Letter: B"], highlight:92, songStart:0, color:"#ef242a" },
+  { id:"huntrix-golden", artist:"Huntr/x", group:"Huntr/x", gender:"girls", company:"K-Pop Demon Hunters", title:"Golden", year:2025, debut:false, youtubeId:"yebNIHKAC4A", tags:["Letter: G"], highlight:64, songStart:0, color:"#ffc110" },
+  { id:"huntrix-hid", artist:"Huntr/x", group:"Huntr/x", gender:"girls", company:"K-Pop Demon Hunters", title:"How It's Done", year:2025, debut:false, youtubeId:"QGsevnbItdU", tags:["Letter: H"], highlight:52, songStart:0, color:"#9af5ff" },
+  
+    
+  { id:"sajaboys-youridol", artist:"Saja Boys", group:"Saja Boys", gender:"boys", company:"K-Pop Demon Hunters", title:"Your Idol", year:2025, debut:false, youtubeId:"2FS3JAPTKXs", tags:["Letter: Y"], highlight:45, songStart:0, color:"#c00070" },
+  { id:"sajaboys-soda", artist:"Saja Boys", group:"Saja Boys", gender:"boys", company:"K-Pop Demon Hunters", title:"Soda Pop", year:2025, debut:false, youtubeId:"hAyPTJFgFEs", tags:["Letter: S"], highlight:68, songStart:0, color:"#ff54b7" },
   { id:"txt-chasing", artist:"TOMORROW X TOGETHER", group:"TXT", gender:"boys", company:"HYBE", title:"Chasing That Feeling", year:2023, debut:false, youtubeId:"k_e2oJzoLw0", tags:["Letter: C"], highlight:37, songStart:0, color:"#00bcd4" },
   { id:"nct-baggy", artist:"NCT U", group:"NCT", gender:"boys", company:"SM", title:"Baggy Jeans", year:2023, debut:false, youtubeId:"PEMndV4J2K0", tags:["Letter: B"], highlight:28, songStart:0, color:"#06b6d4" },
   { id:"straykids-lalalala", artist:"Stray Kids", group:"Stray Kids", gender:"boys", company:"JYP", title:"LALALALA", year:2023, debut:false, youtubeId:"JsOOis4bBFg", tags:["Letter: L"], highlight:32, songStart:0, color:"#4ade80" },
-  { id:"enhypen-drunk", artist:"ENHYPEN", group:"ENHYPEN", gender:"boys", company:"HYBE", title:"Drunk-Dazed", year:2021, debut:false, youtubeId:"Fc7-Oe0tj5k", tags:["Letter: D"], highlight:44, songStart:0, color:"#f87171" },
-  { id:"shinee-lucifer", artist:"SHINee", group:"SHINee", gender:"boys", company:"SM", title:"Lucifer", year:2010, debut:false, youtubeId:"DTBXb4QK3v4", tags:["Letter: L"], highlight:52, songStart:0, color:"#60a5fa" },
+  { id:"enhypen-drunk", artist:"ENHYPEN", group:"ENHYPEN", gender:"boys", company:"HYBE", title:"Drunk-Dazed", year:2021, debut:false, youtubeId:"Fc7-Oe0tj5k", tags:["Letter: D"], highlight:74, songStart:0, color:"#f87171" },
+  { id:"shinee-lucifer", artist:"SHINee", group:"SHINee", gender:"boys", company:"SM", title:"Lucifer", year:2010, debut:false, youtubeId:"DTBXb4QK3v4", tags:["Letter: L"], highlight:52, songStart:0, color:"#ef242a" },
 ]);
+
 
 /* ---------- Helpers ---------- */
 const rand = (n)=>Math.floor(Math.random()*n);
@@ -326,12 +387,21 @@ const els={
   saveRight:document.getElementById('saveRight'),
   score:document.getElementById('score'),
   newPair:document.getElementById('btnNewPair'),
-  championMode:document.getElementById('championMode'),
+  // modal bits
+  btnOptions:document.getElementById('btnOptions'),
+  optsDlg:document.getElementById('opts'),
+  btnCloseOpts:document.getElementById('btnCloseOpts'),
+  btnDoneOpts:document.getElementById('btnDoneOpts'),
   toggleHighlight:document.getElementById('toggleHighlight'),
-  revealLeft:document.getElementById('revealLeft'),
-  revealRight:document.getElementById('revealRight'),
+  championMode:document.getElementById('championMode'),
   autoReveal:document.getElementById('autoReveal'),
   revealOrder:document.getElementById('revealOrder'),
+  showTags:document.getElementById('showTags'),
+  btnHardRefresh:document.getElementById('btnHardRefresh'),
+  // reveal controls
+  revealLeft:document.getElementById('revealLeft'),
+  revealRight:document.getElementById('revealRight'),
+  // sfx
   sfxPop:document.getElementById('sfxPop'),
 };
 
@@ -384,10 +454,9 @@ function startSecondsFor(song){
 /* ---------- SFX ---------- */
 function playPop(){
   try{
-    // clone so overlapping plays are fine
     const a = els.sfxPop.cloneNode(true);
     a.volume = 1;
-    a.play().catch(()=>{ /* autoplay may be blocked until a user gesture */ });
+    a.play().catch(()=>{});
   }catch{}
 }
 
@@ -406,22 +475,20 @@ function revealSide(side){
   if (revealed[side]) return;
   const p = pending[side]; if(!p) return;
 
-  // stop any timer for this side (e.g., manual reveal beats auto)
   clearAutoTimer(side);
 
   const dest = els[side];
   dest.frame.src = p.url;
   dest.artist.textContent = p.song.artist;
   dest.title.textContent  = p.song.title;
-  dest.tags.innerHTML = renderTags(p.song);
+  dest.tags.innerHTML = els.showTags.checked ? renderTags(p.song) : "";
   const cardId = side==='left' ? 'leftCard' : 'rightCard';
   document.getElementById(cardId).classList.remove('concealed');
   revealed[side] = true;
   setVoteEnabled();
 
-  playPop(); // sfx on reveal
+  playPop();
 
-  // If auto reveal is on and the other side isn't revealed, ensure it gets scheduled after the GAP
   if (els.autoReveal.checked){
     const other = side==='left' ? 'right' : 'left';
     if (!revealed[other] && !autoTimers[other]){
@@ -453,11 +520,9 @@ function scheduleAutoReveal(){
   const [first, second] = pickRevealOrder();
 
   if (!revealed.left && !revealed.right){
-    // Fresh round: schedule both with intended gap
     autoTimers[first]  = setTimeout(()=>{ autoTimers[first]=null;  revealSide(first); },  AUTO_FIRST_MS);
     autoTimers[second] = setTimeout(()=>{ autoTimers[second]=null; revealSide(second); }, AUTO_FIRST_MS + AUTO_GAP_MS);
   } else if (revealed.left && !revealed.right){
-    // Only right left to reveal -> wait a full gap from now
     autoTimers.right = setTimeout(()=>{ autoTimers.right=null; revealSide('right'); }, AUTO_GAP_MS);
   } else if (revealed.right && !revealed.left){
     autoTimers.left = setTimeout(()=>{ autoTimers.left=null; revealSide('left'); }, AUTO_GAP_MS);
@@ -483,7 +548,6 @@ function availableRandomKeys(){
   return [...base, ...dyn];
 }
 function nextPair(keepChampion=false){
-  // New round: kill any old timers so they can't fire into the next round
   clearAllAutoTimers();
 
   const chosenKey = (els.categorySelect.value==="random" && !keepChampion)
@@ -513,11 +577,12 @@ function nextPair(keepChampion=false){
   applySongToSide(pair[1], 'right');
   setRuleLabel(chosenKey);
 
-  // match page background to song colors
   setPageGradient(getSongColor(pair[0],'left'), getSongColor(pair[1],'right'));
 
-  // reset voting & schedule auto reveal
+  // ensure vote buttons are OFF at the start of the round
+  revealed.left = false; revealed.right = false;
   setVoteEnabled();
+
   scheduleAutoReveal();
 }
 
@@ -576,7 +641,16 @@ els.categorySelect.addEventListener('change', ()=>{ updateCategoryUI(); setRuleL
 els.yearInput.addEventListener('input', ()=> setRuleLabel('year'));
 els.letterInput.addEventListener('input', ()=>{ els.letterInput.value = els.letterInput.value.toUpperCase(); setRuleLabel('startsWith'); });
 document.getElementById('btnNewPair').addEventListener('click', ()=> nextPair(els.championMode.checked));
-document.getElementById('btnHardRefresh').addEventListener('click', hardRefresh);
+
+/* Options modal */
+els.btnOptions.addEventListener('click', ()=> els.optsDlg.showModal());
+els.btnCloseOpts.addEventListener('click', ()=> els.optsDlg.close());
+els.btnDoneOpts.addEventListener('click', ()=> els.optsDlg.close());
+
+/* Options actions */
+els.btnHardRefresh.addEventListener('click', hardRefresh);
+
+/* Vote buttons */
 els.saveLeft.addEventListener('click', ()=> choose('left'));
 els.saveRight.addEventListener('click', ()=> choose('right'));
 
@@ -591,9 +665,7 @@ els.toggleHighlight.addEventListener('change', ()=>{
     if (!p) return;
     const song = p.song;
     p.url = embedUrl(song.youtubeId, startSecondsFor(song));
-    if (revealed[side]) {
-      els[side].frame.src = p.url;
-    }
+    if (revealed[side]) els[side].frame.src = p.url;
   });
 });
 
@@ -604,6 +676,16 @@ els.autoReveal.addEventListener('change', ()=>{
 });
 els.revealOrder.addEventListener('change', ()=>{
   if (els.autoReveal.checked) scheduleAutoReveal();
+});
+
+/* Show tags toggle */
+els.showTags.addEventListener('change', ()=>{
+  ['left','right'].forEach(side=>{
+    if (revealed[side]){
+      const song = pending[side]?.song;
+      els[side].tags.innerHTML = (song && els.showTags.checked) ? renderTags(song) : "";
+    }
+  });
 });
 
 /* ---------- Init ---------- */
