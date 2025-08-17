@@ -33,6 +33,7 @@
   button{border:none; background:#111; color:#fff; padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:700}
   .btn-accent{background:var(--accent); color:#022b1a}
   .btn-ghost{background:#111827}
+  .btn-danger{background:var(--danger)}
   .tog{display:flex; align-items:center; gap:8px; background:#111827; border-radius:999px; padding:6px 10px; cursor:pointer; user-select:none}
   .tog input{display:none}
   .dot{width:18px; height:18px; border-radius:999px; background:#333}
@@ -72,8 +73,8 @@
       0   -2px 0 var(--text-stroke-color);
   }
   .meta{text-align:center; background:#00000055; padding:10px; border-radius:12px}
-  .artist{font-weight:900; font-size: clamp(26px, 3.4vw, 36px); --stroke-size: 1px;}
-  .title {font-weight:800; font-size: clamp(20px, 2.6vw, 28px); --stroke-size: 1px;}
+  .artist{font-weight:900; font-size: clamp(28px, 3.8vw, 40px); --stroke-size: 1px;}
+  .title {font-weight:800; font-size: clamp(22px, 3vw, 32px);  --stroke-size: 1px;}
 
   .tags{margin-top:6px; display:flex; flex-wrap:wrap; gap:6px; justify-content:center}
   .tag{background:#0b0b14; color:#cbd5e1; font-size:12px; padding:4px 8px; border-radius:999px}
@@ -91,16 +92,16 @@
     background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,.55));
     border-radius:var(--radius);
     visibility:hidden; opacity:0; transition:opacity .2s ease;
-    pointer-events:none;                 /* <<< FIX: don't block clicks when hidden */
+    pointer-events:none;                 /* don't block clicks when hidden */
   }
   .side.concealed .veil{
     visibility:visible; opacity:1;
-    pointer-events:auto;                /* <<< Only clickable while concealed */
+    pointer-events:auto;                /* Only clickable while concealed */
   }
   .revealBtn{font-size:clamp(18px,2.4vw,22px); padding:14px 18px}
   .hint{font-size:12px; opacity:.8}
 
-  /* Modal */
+  /* Modal base */
   dialog{border:none; padding:0; border-radius:16px; width:min(720px,92vw); max-height:90vh; overflow:auto; box-shadow:0 20px 80px rgba(0,0,0,.5)}
   .modalHead{display:flex; justify-content:space-between; align-items:center; padding:12px 14px; background:#0b0b14; color:#fff}
   .modalBody{padding:14px; background:#0f172a; color:#e5e7eb}
@@ -110,9 +111,20 @@
   .spacer{height:8px}
   footer.modalFoot{padding:10px 14px; display:flex; justify-content:flex-end; gap:8px; background:#0b0b14}
 
+  /* Stats layout */
+  .statsGrid{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+  .statCard{background:#0b0b14; border-radius:12px; padding:12px}
+  .statCard h3{margin:0 0 8px 0; font-size:16px}
+  .list{margin:0; padding:0; list-style:none}
+  .list li{display:flex; justify-content:space-between; align-items:center; padding:8px 10px; border-radius:10px; background:#0f1a2a; margin-bottom:6px}
+  .list .name{font-weight:700; color:#e5e7eb}
+  .list .count{background:#111827; color:#cbd5e1; padding:4px 8px; border-radius:999px; font-size:12px}
+  .empty{padding:10px; text-align:center; color:#a1a1aa; background:#0f1a2a; border-radius:10px}
+
   /* Disabled vote buttons */
   button:disabled{opacity:.45; cursor:not-allowed}
 
+  @media (max-width: 700px){ .statsGrid{grid-template-columns:1fr} }
   @media (max-width: 420px){
     .artist{ --stroke-size: 2.2px; }
     .title { --stroke-size: 1.8px; }
@@ -135,6 +147,7 @@
 
     <button class="btn-ghost" id="btnNewPair">New Pair</button>
     <button class="btn-ghost" id="btnOptions">Options</button>
+    <button class="btn-ghost" id="btnStats">Stats</button>
   </div>
 </header>
 
@@ -229,6 +242,33 @@
   </footer>
 </dialog>
 
+<!-- Stats Modal -->
+<dialog id="statsDlg">
+  <div class="modalHead">
+    <strong>Player Stats</strong>
+    <button class="btn-ghost" id="btnCloseStats">✕</button>
+  </div>
+  <div class="modalBody">
+    <div class="row" style="justify-content:space-between; width:100%">
+      <div class="muted" id="totalChoicesLabel">Total choices: 0</div>
+      <button class="btn-danger" id="btnResetStats" title="Clear all saved counts">Reset stats</button>
+    </div>
+    <div class="statsGrid">
+      <div class="statCard">
+        <h3>Top 5 Artists</h3>
+        <ul class="list" id="topArtists"></ul>
+      </div>
+      <div class="statCard">
+        <h3>Top 5 Songs</h3>
+        <ul class="list" id="topSongs"></ul>
+      </div>
+    </div>
+  </div>
+  <footer class="modalFoot">
+    <button class="btn-accent" id="btnDoneStats">Done</button>
+  </footer>
+</dialog>
+
 <!-- SFX -->
 <audio id="sfxPop" src="pop.mp3" preload="auto"></audio>
 
@@ -268,12 +308,31 @@ const SONGS = Object.freeze([
   { id:"enhypen-drunk", artist:"ENHYPEN", group:"ENHYPEN", gender:"boys", company:"HYBE", title:"Drunk-Dazed", year:2021, debut:false, youtubeId:"Fc7-Oe0tj5k", tags:["Letter: D"], highlight:74, songStart:0, color:"#f87171" },
   { id:"shinee-lucifer", artist:"SHINee", group:"SHINee", gender:"boys", company:"SM", title:"Lucifer", year:2010, debut:false, youtubeId:"DTBXb4QK3v4", tags:["Letter: L"], highlight:52, songStart:0, color:"#ef242a" },
 ]);
+/* ---------- Stats persistence ---------- */
+const STATS_KEY = "kpop_sodo_stats_v1";
+function loadStats(){
+  try{
+    const raw = localStorage.getItem(STATS_KEY);
+    if(!raw) return { total:0, songs:{}, artists:{} };
+    const s = JSON.parse(raw);
+    return { total: Number(s.total||0), songs: s.songs||{}, artists: s.artists||{} };
+  }catch{ return { total:0, songs:{}, artists:{} }; }
+}
+function saveStats(stats){ localStorage.setItem(STATS_KEY, JSON.stringify(stats)); }
+function resetStats(){
+  const empty = { total:0, songs:{}, artists:{} };
+  saveStats(empty);
+  return empty;
+}
+let STATS = loadStats();
 
+/* Precompute song index for quick lookups */
+const SONG_INDEX = Object.fromEntries(SONGS.map(s => [s.id, s]));
 
 /* ---------- Helpers ---------- */
 const rand = (n)=>Math.floor(Math.random()*n);
 const sample = (arr)=> arr.length?arr[rand(arr.length)]:null;
-const escapeHtml = (s)=>String(s).replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
+const escapeHtml = (s)=>String(s).replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;","&gt;":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
 function embedUrl(yid, startSec){
   const base=`https://www.youtube-nocookie.com/embed/${yid}?autoplay=0&modestbranding=1&rel=0`;
   const start = (startSec && startSec>0) ? `&start=${Math.floor(startSec)}` : "";
@@ -398,6 +457,15 @@ const els={
   revealOrder:document.getElementById('revealOrder'),
   showTags:document.getElementById('showTags'),
   btnHardRefresh:document.getElementById('btnHardRefresh'),
+  // stats
+  btnStats:document.getElementById('btnStats'),
+  statsDlg:document.getElementById('statsDlg'),
+  btnCloseStats:document.getElementById('btnCloseStats'),
+  btnDoneStats:document.getElementById('btnDoneStats'),
+  btnResetStats:document.getElementById('btnResetStats'),
+  topArtists:document.getElementById('topArtists'),
+  topSongs:document.getElementById('topSongs'),
+  totalChoicesLabel:document.getElementById('totalChoicesLabel'),
   // reveal controls
   revealLeft:document.getElementById('revealLeft'),
   revealRight:document.getElementById('revealRight'),
@@ -619,11 +687,61 @@ function renderTags(s){
   return chips.join("");
 }
 
+/* ---------- Stats logic ---------- */
+function recordSave(song){
+  STATS.total = (STATS.total || 0) + 1;
+  STATS.songs[song.id]   = (STATS.songs[song.id] || 0) + 1;
+  STATS.artists[song.artist] = (STATS.artists[song.artist] || 0) + 1;
+  saveStats(STATS);
+}
+function topNFromMap(map, n, mapToName){
+  const arr = Object.entries(map); // [key,count]
+  arr.sort((a,b)=>{
+    if (b[1] !== a[1]) return b[1] - a[1];               // count desc
+    const an = mapToName(a[0]) || a[0];
+    const bn = mapToName(b[0]) || b[0];
+    return an.localeCompare(bn);                          // tie-break by name
+  });
+  return arr.slice(0, n);
+}
+function renderStats(){
+  // total
+  els.totalChoicesLabel.textContent = `Total choices: ${STATS.total || 0}`;
+
+  // artists
+  const topArtists = topNFromMap(STATS.artists || {}, 5, (artist)=>artist);
+  els.topArtists.innerHTML = topArtists.length
+    ? topArtists.map(([artist,count])=>(
+        `<li><span class="name">${escapeHtml(artist)}</span><span class="count">${count}</span></li>`
+      )).join("")
+    : `<div class="empty">No saves yet — go play a round!</div>`;
+
+  // songs
+  const topSongs = topNFromMap(STATS.songs || {}, 5, (id)=> (SONG_INDEX[id]?.title ? `${SONG_INDEX[id].artist} — ${SONG_INDEX[id].title}` : id) );
+  els.topSongs.innerHTML = topSongs.length
+    ? topSongs.map(([id,count])=>{
+        const s = SONG_INDEX[id];
+        const label = s ? `${s.artist} — ${s.title}` : id;
+        return `<li><span class="name">${escapeHtml(label)}</span><span class="count">${count}</span></li>`;
+      }).join("")
+    : `<div class="empty">No saves yet — go play a round!</div>`;
+}
+
+/* ---------- Choose ---------- */
 function choose(side){
   if(!(revealed.left && revealed.right)) return;
   const winner = (side==='left') ? currentPair[0] : currentPair[1];
+
+  // record stats
+  recordSave(winner);
+
+  // keep champion if enabled
   champion = els.championMode.checked ? winner : null;
+
+  // UI counters
   picks++; els.score.textContent = `Choices: ${picks}`;
+
+  // next round
   nextPair(els.championMode.checked);
 }
 
@@ -649,6 +767,16 @@ els.btnDoneOpts.addEventListener('click', ()=> els.optsDlg.close());
 
 /* Options actions */
 els.btnHardRefresh.addEventListener('click', hardRefresh);
+
+/* Stats modal */
+els.btnStats.addEventListener('click', ()=>{ renderStats(); els.statsDlg.showModal(); });
+els.btnCloseStats.addEventListener('click', ()=> els.statsDlg.close());
+els.btnDoneStats.addEventListener('click', ()=> els.statsDlg.close());
+els.btnResetStats.addEventListener('click', ()=>{
+  if(!confirm("Reset all stats (artists and songs)?")) return;
+  STATS = resetStats();
+  renderStats();
+});
 
 /* Vote buttons */
 els.saveLeft.addEventListener('click', ()=> choose('left'));
@@ -692,6 +820,8 @@ els.showTags.addEventListener('change', ()=>{
 refreshCategoryDropdown();
 els.categorySelect.value = "random";
 setRuleLabel("random");
+picks = STATS.total || 0;             // keep score in sync with stats
+els.score.textContent = `Choices: ${picks}`;
 nextPair(false);
 </script>
 </body>
