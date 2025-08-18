@@ -277,7 +277,7 @@
 const AUTO_FIRST_MS = 300;   // delay before first reveal
 const AUTO_GAP_MS   = 1200;  // gap between first and second reveal
 
-/* ---------- Hard-coded songs ---------- */
+
 const SONGS = Object.freeze([
   { id:"lesserafim-crazy", artist:"LE SSERAFIM", group:"LE SSERAFIM", gender:"girls", company:"HYBE", title:"Crazy", year:2024, debut:false, youtubeId:"n6B5gQXlB-0", tags:["Letter: C"], highlight:64, songStart:0, color:"#ff6aa0" },
   { id:"aespa-whiplash", artist:"aespa", group:"aespa", gender:"girls", company:"SM", title:"Whiplash", year:2024, debut:false, youtubeId:"jWQx2f-CErU", tags:["Letter: W"], highlight:36, songStart:0, color:"#7a8cff" },
@@ -294,20 +294,57 @@ const SONGS = Object.freeze([
   { id:"illit-ticktack", artist:"ILLIT", group:"ILLIT", gender:"girls", company:"HYBE", title:"Tick-Tack", year:2024, debut:false, youtubeId:"-nEGVrzPaiU", tags:["Letter: T"], highlight:68, songStart:0, color:"#ffa9ca" },
   { id:"illit-cherish", artist:"ILLIT", group:"ILLIT", gender:"girls", company:"HYBE", title:"Cherish (My Love)", year:2024, debut:false, youtubeId:"tbDGl7jEazA", tags:["Letter: C", "Love"], highlight:52, songStart:0, color:"#c9024e" },
   { id:"illit-lgs", artist:"ILLIT", group:"ILLIT", gender:"girls", company:"HYBE", title:"Lucky Girl Syndrome", year:2024, debut:false, youtubeId:"UCmgGZbfjmk", tags:["Letter: L", "Girl"], highlight:38, songStart:0, color:"#9fff81" },
-  { id:"bdc-fgirl", artist:"Baby DONT Cry", group:"Baby DONT Cry", gender:"girls", company:"P Nation", title:"F Girl", year:2025, debut:true, youtubeId:"fmGBeGSp7fs", tags:["Letter: F", "Girl"], highlight:61, songStart:0, color:"#ef242a" },
+  { id:"bdc-fgirl", artist:"Baby DONT Cry", group:"Baby DONT Cry", gender:"girls", company:"P Nation", title:"F Girl", year:2025, debut:true, youtubeId:"fmGBeGSp7fs", tags:["Letter: F", "Girl", "Debut"], highlight:61, songStart:0, color:"#ef242a" },
   { id:"bdc-byr", artist:"Baby DONT Cry", group:"Baby DONT Cry", gender:"girls", company:"P Nation", title:"Bet You'll Regret It", year:2025, debut:false, youtubeId:"uWT79Qq52sU", tags:["Letter: B"], highlight:92, songStart:0, color:"#ef242a" },
   { id:"huntrix-golden", artist:"Huntr/x", group:"Huntr/x", gender:"girls", company:"K-Pop Demon Hunters", title:"Golden", year:2025, debut:false, youtubeId:"yebNIHKAC4A", tags:["Letter: G"], highlight:64, songStart:0, color:"#ffc110" },
   { id:"huntrix-hid", artist:"Huntr/x", group:"Huntr/x", gender:"girls", company:"K-Pop Demon Hunters", title:"How It's Done", year:2025, debut:false, youtubeId:"QGsevnbItdU", tags:["Letter: H"], highlight:52, songStart:0, color:"#9af5ff" },
-  
-    
+  { id:"smn-waveway", artist:"SAY MY NAME", group:"SAY MY NAME", gender:"girls", company:"Inkode", title:"WaveWay", year:2024, debut:true, youtubeId:"LzeUBByxQKo", tags:["Letter: W"], highlight:53, songStart:0, color:"#26e5ff" },
+  { id:"smn-shalala", artist:"SAY MY NAME", group:"SAY MY NAME", gender:"girls", company:"Inkode", title:"ShaLala", year:2025, debut:false, youtubeId:"rPEfIvfmCxM", tags:["Letter: S"], highlight:58, songStart:0, color:"#0066ff" },
+  { id:"smn-ily", artist:"SAY MY NAME", group:"SAY MY NAME", gender:"girls", company:"Inkode", title:"iLy", year:2025, debut:false, youtubeId:"XceS5vnJvUg", tags:["Letter: I"], highlight:87, songStart:0, color:"#00e1b4" },
+  { id:"kiiikiii-idome", artist:"KiiiKiii", group:"KiiiKiii", gender:"girls", company:"Starship", title:"I DO ME", year:2025, debut:true, youtubeId:"hAEfi_SKTEU", tags:["Letter: I", "Debut"], highlight:41, songStart:0, color:"#00fff0" },
+  { id:"kiiikiii-dancingalone", artist:"KiiiKiii", group:"KiiiKiii", gender:"girls", company:"Starship", title:"DANCING ALONE", year:2025, debut:false, youtubeId:"u5wMLWs6LSs", tags:["Letter: D"], highlight:50, songStart:0, color:"#c819ff" },
+  { id:"kiiikiii-btg", artist:"KiiiKiii", group:"KiiiKiii", gender:"girls", company:"Starship", title:"BTG", year:2025, debut:false, youtubeId:"hnCd1RyTaOA", tags:["Letter: B"], highlight:34, songStart:0, color:"#7c00a3" },
+  { id:"ifeye-ruok", artist:"ifeye", group:"ifeye", gender:"girls", company:"HI-HAT", title:"r u ok?", year:2025, debut:false, youtubeId:"tGMy0z1akLs", tags:["Letter: R"], highlight:91, songStart:0, color:"#22afff" },
+  { id:"ifeye-nerdy", artist:"ifeye", group:"ifeye", gender:"girls", company:"HI-HAT", title:"NERDY", year:2025, debut:true, youtubeId:"I_msu2-4UAU", tags:["Letter: R","Debut"], highlight:46, songStart:0, color:"#22afff" }, 
+  { id:"aespa-supernova", artist:"aespa", group:"aespa", gender:"girls", company:"SM", title:"Supernova", year:2024, debut:false, youtubeId:"phuiiNCxRMg", tags:["Letter: S"], highlight:40, songStart:0, color:"#2e8100" },
+  { id:"aespa-drama", artist:"aespa", group:"aespa", gender:"girls", company:"SM", title:"Drama", year:2023, debut:false, youtubeId:"D8VEhcPeSlc", tags:["Letter: D"], highlight:57, songStart:0, color:"#ed0500" },
+  { id:"lesserafim-hot", artist:"LE SSERAFIM", group:"LE SSERAFIM", gender:"girls", company:"HYBE", title:"HOT", year:2025, debut:false, youtubeId:"r9AEGPB6qIU", tags:["Letter: H"], highlight:43, songStart:0, color:"#ff9e00" },
+  { id:"lesserafim-easy", artist:"LE SSERAFIM", group:"LE SSERAFIM", gender:"girls", company:"HYBE", title:"EASY", year:2024, debut:false, youtubeId:"bNKXxwOQYB8", tags:["Letter: E"], highlight:82, songStart:0, color:"#f4f4f4" },
+  { id:"lesserafim-pnight", artist:"LE SSERAFIM", group:"LE SSERAFIM", gender:"girls", company:"HYBE", title:"Perfect Night", year:2023, debut:false, youtubeId:"hLvWy2b857I", tags:["Letter: P"], highlight:47, songStart:0, color:"#ff1eed" },
+  { id:"lesserafim-smart", artist:"LE SSERAFIM", group:"LE SSERAFIM", gender:"girls", company:"HYBE", title:"Smart", year:2024, debut:false, youtubeId:"KNexS61fjus", tags:["Letter: S"], highlight:61, songStart:0, color:"#ff7a00" },
+  { id:"lesserafim-anti", artist:"LE SSERAFIM", group:"LE SSERAFIM", gender:"girls", company:"HYBE", title:"ANTIFRAGILE", year:2022, debut:false, youtubeId:"pyf8cbqyfPs", tags:["Letter: A"], highlight:62, songStart:0, color:"#e0d059" },
+  { id:"lesserafim-diff", artist:"LE SSERAFIM", group:"LE SSERAFIM", gender:"girls", company:"HYBE", title:"DIFFERENT", year:2025, debut:false, youtubeId:"HFZUAXhdnHk", tags:["Letter: D"], highlight:52, songStart:0, color:"#ef8af5" },
+  { id:"lesserafim-kawaii", artist:"LE SSERAFIM", group:"LE SSERAFIM", gender:"girls", company:"HYBE", title:"Kawaii (Prod. Gen Hoshino)", year:2025, debut:false, youtubeId:"DY4ckIx94xw", tags:["Letter: K"], highlight:65, songStart:0, color:"#ff82e4" },
+  { id:"lesserafim-fearless", artist:"LE SSERAFIM", group:"LE SSERAFIM", gender:"girls", company:"HYBE", title:"FEARLESS", year:2022, debut:true, youtubeId:"4vbDFu0PUew", tags:["Letter: F"], highlight:43, songStart:0, color:"#313131" },
+  { id:"lesserafim-unforgiven", artist:"LE SSERAFIM", group:"LE SSERAFIM", gender:"girls", company:"HYBE", title:"UNFORGIVEN", year:2023, debut:false, youtubeId:"UBURTj20HXI", tags:["Letter: U"], highlight:99, songStart:0, color:"#9f0013" },
+  { id:"newjeans-eta", artist:"NewJeans", group:"NewJeans", gender:"girls", company:"HYBE", title:"ETA", year:2023, debut:false, youtubeId:"jOTfBlKSQYY", tags:["Letter: E"], highlight:71, songStart:0, color:"#237400" },
+  { id:"newjeans-sshy", artist:"NewJeans", group:"NewJeans", gender:"girls", company:"HYBE", title:"Super Shy", year:2023, debut:false, youtubeId:"ArmDp-zijuc", tags:["Letter: S"], highlight:55, songStart:0, color:"#fcff7a" },
+  { id:"newjeans-attention", artist:"NewJeans", group:"NewJeans", gender:"girls", company:"HYBE", title:"Attention", year:2022, debut:true, youtubeId:"js1CtxSY38I", tags:["Letter: A"], highlight:71, songStart:0, color:"#00ffff" },
+  { id:"newjeans-ditto", artist:"NewJeans", group:"NewJeans", gender:"girls", company:"HYBE", title:"Ditto", year:2023, debut:false, youtubeId:"pSUydWEqKwE", tags:["Letter: D"], highlight:137, songStart:0, color:"#00ffff" },
+  { id:"newjeans-hypeboy", artist:"NewJeans", group:"NewJeans", gender:"girls", company:"HYBE", title:"Hype Boy", year:2022, debut:false, youtubeId:"11cta61wi0g", tags:["Letter: H"], highlight:53, songStart:0, color:"#001fdc" },
+  { id:"ive-afterlike", artist:"IVE", group:"IVE", gender:"girls", company:"Starship", title:"After LIKE", year:2023, debut:false, youtubeId:"F0B7HDiY-10", tags:["Letter: A"], highlight:31, songStart:0, color:"#0fff00" },
+  { id:"ive-iam", artist:"IVE", group:"IVE", gender:"girls", company:"Starship", title:"I AM", year:2023, debut:false, youtubeId:"6ZUIwj3FgUY", tags:["Letter: I"], highlight:51, songStart:0, color:"#b5fff5" },
+  { id:"ive-attitude", artist:"IVE", group:"IVE", gender:"girls", company:"Starship", title:"ATTITUDE", year:2025, debut:false, youtubeId:"38xYeot-ciM", tags:["Letter: A"], highlight:50, songStart:0, color:"#efc5ff" },
+  { id:"ive-rebelheart", artist:"IVE", group:"IVE", gender:"girls", company:"Starship", title:"REBEL HEART", year:2025, debut:false, youtubeId:"g36q0ZLvygQ", tags:["Letter: R"], highlight:50, songStart:0, color:"#f5004e" },
+  { id:"h2h-chase", artist:"Hearts2Hearts", group:"Hearts2Hearts", gender:"girls", company:"SM", title:"The Chase", year:2025, debut:true, youtubeId:"kxUA2wwYiME", tags:["Letter: T"], highlight:85, songStart:0, color:"#5196ff" },
+  { id:"yena-nemo", artist:"YENA", group:"YENA", gender:"girls", company:"Stone", title:"NEMONEMO", year:2024, debut:false, youtubeId:"MPp8hbuZwW0", tags:["Letter: N", "Soloist"], highlight:56, songStart:0, color:"#ff4eed" },
+  { id:"yena-smiley", artist:"YENA", group:"YENA", gender:"girls", company:"Stone", title:"SMILEY (Feat. BIBI)", year:2022, debut:true, youtubeId:"y9kkXTucnLU", tags:["Letter: S", "Soloist"], highlight:74, songStart:0, color:"#fbff42" },
+  { id:"qwer-tbh", artist:"QWER", group:"QWER", gender:"girls", company:"TAMAGO", title:"T.B.H", year:2024, debut:false, youtubeId:"ImuWa3SJulY", tags:["Letter: T"], highlight:65, songStart:0, color:"#ff00db" },
+  { id:"qwer-malgeum", artist:"QWER", group:"QWER", gender:"girls", company:"TAMAGO", title:"My Name Is Malguem", year:2024, debut:false, youtubeId:"AlirzLFEHUI", tags:["Letter: M"], highlight:70, songStart:0, color:"#c0ffb9" },
+  { id:"fiftyfifty-pookie", artist:"FIFTY FIFTY", group:"FIFTY FIFTY", gender:"girls", company:"ATTRAKT", title:"Pookie", year:2025, debut:false, youtubeId:"1ZX1vEDTfY4", tags:["Letter: P"], highlight:50, songStart:0, color:"#00c2ff" },
+  { id:"fiftyfifty-sos", artist:"FIFTY FIFTY", group:"FIFTY FIFTY", gender:"girls", company:"ATTRAKT", title:"SOS", year:2024, debut:false, youtubeId:"XpZTcLSH6Cc", tags:["Letter: S"], highlight:39, songStart:0, color:"#8402ae" },
+  { id:"stayc-teddy", artist:"STAYC", group:"STAYC", gender:"girls", company:"High Up", title:"Teddy Bear", year:2023, debut:false, youtubeId:"SxHmoifp0oQ", tags:["Letter: T"], highlight:41, songStart:0, color:"#6d008f" },
+  { id:"stayc-bubble", artist:"STAYC", group:"STAYC", gender:"girls", company:"High Up", title:"Bubble", year:2023, debut:false, youtubeId:"3-ptVHZZdBg", tags:["Letter: B"], highlight:43, songStart:0, color:"#ff448b" },
+  { id:"stayc-asap", artist:"STAYC", group:"STAYC", gender:"girls", company:"High Up", title:"ASAP", year:2021, debut:false, youtubeId:"NsY-9MCOIAQ", tags:["Letter: A"], highlight:45, songStart:0, color:"#ff9aeb" },
+  { id:"izone-panorama", artist:"IZ*ONE", group:"IZ#ONE", gender:"girls", company:"Off The Record", title:"Panorama", year:2020, debut:false, youtubeId:"G8GaQdW2wHc", tags:["Letter: P"], highlight:56, songStart:0, color:"#eaeaea" },
+  { id:"izone-rose", artist:"IZ*ONE", group:"IZ#ONE", gender:"girls", company:"Off The Record", title:"La Vie en Rose", year:2018, debut:false, youtubeId:"WZwr2a_lFWY", tags:["Letter: L"], highlight:62, songStart:0, color:"#ca0000" },
+
   { id:"sajaboys-youridol", artist:"Saja Boys", group:"Saja Boys", gender:"boys", company:"K-Pop Demon Hunters", title:"Your Idol", year:2025, debut:false, youtubeId:"2FS3JAPTKXs", tags:["Letter: Y"], highlight:45, songStart:0, color:"#c00070" },
   { id:"sajaboys-soda", artist:"Saja Boys", group:"Saja Boys", gender:"boys", company:"K-Pop Demon Hunters", title:"Soda Pop", year:2025, debut:false, youtubeId:"hAyPTJFgFEs", tags:["Letter: S"], highlight:68, songStart:0, color:"#ff54b7" },
-  { id:"txt-chasing", artist:"TOMORROW X TOGETHER", group:"TXT", gender:"boys", company:"HYBE", title:"Chasing That Feeling", year:2023, debut:false, youtubeId:"k_e2oJzoLw0", tags:["Letter: C"], highlight:37, songStart:0, color:"#00bcd4" },
-  { id:"nct-baggy", artist:"NCT U", group:"NCT", gender:"boys", company:"SM", title:"Baggy Jeans", year:2023, debut:false, youtubeId:"PEMndV4J2K0", tags:["Letter: B"], highlight:28, songStart:0, color:"#06b6d4" },
-  { id:"straykids-lalalala", artist:"Stray Kids", group:"Stray Kids", gender:"boys", company:"JYP", title:"LALALALA", year:2023, debut:false, youtubeId:"JsOOis4bBFg", tags:["Letter: L"], highlight:32, songStart:0, color:"#4ade80" },
   { id:"enhypen-drunk", artist:"ENHYPEN", group:"ENHYPEN", gender:"boys", company:"HYBE", title:"Drunk-Dazed", year:2021, debut:false, youtubeId:"Fc7-Oe0tj5k", tags:["Letter: D"], highlight:74, songStart:0, color:"#f87171" },
-  { id:"shinee-lucifer", artist:"SHINee", group:"SHINee", gender:"boys", company:"SM", title:"Lucifer", year:2010, debut:false, youtubeId:"DTBXb4QK3v4", tags:["Letter: L"], highlight:52, songStart:0, color:"#ef242a" },
+
 ]);
+
 /* ---------- Stats persistence ---------- */
 const STATS_KEY = "kpop_sodo_stats_v1";
 function loadStats(){
