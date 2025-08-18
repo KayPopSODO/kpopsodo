@@ -23,7 +23,9 @@
     transition: background .25s ease;
   }
   header{padding:10px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px;}
-  .brand{font-weight:900; letter-spacing:.5px; display:flex; align-items:center; gap:10px}
+  .brand{display:flex; align-items:center; gap:10px}
+  .brand .logo{height:84px; width:auto; display:block}
+  @media (max-width:480px){ .brand .logo{height:28px} }
   .brand .pill{background:#111; padding:6px 10px; border-radius:999px; font-size:12px; color:#aaa}
   .controls{display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:flex-end}
   select,input[type="text"],input[type="number"]{
@@ -134,8 +136,8 @@
 <body>
 <header>
   <div class="brand">
-    <span style="font-size:22px">🎵 Save One • Drop One</span>
-    <span class="pill">K-Pop Edition</span>
+    <img src="logo.png" alt="Save One • Drop One" class="logo" draggable="false" />
+    <!-- <span class="pill">K-Pop Edition</span> -->
   </div>
   <div class="controls">
     <span class="bar" id="categoryLabel">Category: —</span>
@@ -277,7 +279,7 @@
 const AUTO_FIRST_MS = 300;   // delay before first reveal
 const AUTO_GAP_MS   = 1200;  // gap between first and second reveal
 
-
+/* ---------- Hard-coded songs ---------- */
 const SONGS = Object.freeze([
   { id:"lesserafim-crazy", artist:"LE SSERAFIM", group:"LE SSERAFIM", gender:"girls", company:"HYBE", title:"Crazy", year:2024, debut:false, youtubeId:"n6B5gQXlB-0", tags:["Letter: C"], highlight:64, songStart:0, color:"#ff6aa0" },
   { id:"aespa-whiplash", artist:"aespa", group:"aespa", gender:"girls", company:"SM", title:"Whiplash", year:2024, debut:false, youtubeId:"jWQx2f-CErU", tags:["Letter: W"], highlight:36, songStart:0, color:"#7a8cff" },
@@ -319,7 +321,7 @@ const SONGS = Object.freeze([
   { id:"lesserafim-unforgiven", artist:"LE SSERAFIM", group:"LE SSERAFIM", gender:"girls", company:"HYBE", title:"UNFORGIVEN", year:2023, debut:false, youtubeId:"UBURTj20HXI", tags:["Letter: U"], highlight:99, songStart:0, color:"#9f0013" },
   { id:"newjeans-eta", artist:"NewJeans", group:"NewJeans", gender:"girls", company:"HYBE", title:"ETA", year:2023, debut:false, youtubeId:"jOTfBlKSQYY", tags:["Letter: E"], highlight:71, songStart:0, color:"#237400" },
   { id:"newjeans-sshy", artist:"NewJeans", group:"NewJeans", gender:"girls", company:"HYBE", title:"Super Shy", year:2023, debut:false, youtubeId:"ArmDp-zijuc", tags:["Letter: S"], highlight:55, songStart:0, color:"#fcff7a" },
-  { id:"newjeans-attention", artist:"NewJeans", group:"NewJeans", gender:"girls", company:"HYBE", title:"Attention", year:2022, debut:true, youtubeId:"js1CtxSY38I", tags:["Letter: A"], highlight:71, songStart:0, color:"#00ffff" },
+  { id:"newjeans-attention", artist:"NewJeans", group:"NewJeans", gender:"girls", company:"HYBE", title:"Attention", year:2022, debut:true, youtubeId:"js1CtxSY38I", tags:["Letter: A"], highlight:139, songStart:0, color:"#00ffff" },
   { id:"newjeans-ditto", artist:"NewJeans", group:"NewJeans", gender:"girls", company:"HYBE", title:"Ditto", year:2023, debut:false, youtubeId:"pSUydWEqKwE", tags:["Letter: D"], highlight:137, songStart:0, color:"#00ffff" },
   { id:"newjeans-hypeboy", artist:"NewJeans", group:"NewJeans", gender:"girls", company:"HYBE", title:"Hype Boy", year:2022, debut:false, youtubeId:"11cta61wi0g", tags:["Letter: H"], highlight:53, songStart:0, color:"#001fdc" },
   { id:"ive-afterlike", artist:"IVE", group:"IVE", gender:"girls", company:"Starship", title:"After LIKE", year:2023, debut:false, youtubeId:"F0B7HDiY-10", tags:["Letter: A"], highlight:31, songStart:0, color:"#0fff00" },
@@ -372,7 +374,7 @@ const SONG_INDEX = Object.fromEntries(SONGS.map(s => [s.id, s]));
 /* ---------- Helpers ---------- */
 const rand = (n)=>Math.floor(Math.random()*n);
 const sample = (arr)=> arr.length?arr[rand(arr.length)]:null;
-const escapeHtml = (s)=>String(s).replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;","&gt;":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
+const escapeHtml = (s)=>String(s).replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
 function embedUrl(yid, startSec){
   const base=`https://www.youtube-nocookie.com/embed/${yid}?autoplay=0&modestbranding=1&rel=0`;
   const start = (startSec && startSec>0) ? `&start=${Math.floor(startSec)}` : "";
